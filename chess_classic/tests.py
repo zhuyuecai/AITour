@@ -37,7 +37,7 @@ class Test_visualization(unittest.TestCase):
   [ 1,  1,  1],
   [ 0,  0,  0],
   [ 1,  1,  1]]])
-        self.assertEqual( (t_G- G).all(), False)
+        self.assertEqual( (index_to_image(solution)- G).all(), False)
  
 
 
