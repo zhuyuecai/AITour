@@ -47,6 +47,13 @@ cdef list attack(int *a,int *b):
     
     return result
 
+"""
+@note: count_all_attacks take an solution as arguments and return the total number of possible attacks without considering if there is a blocking queen in the attack path 
+
+"""
+cpdef int count_all_attacks(list solution):
+    
+
 
 
 #--------------python wrappers-------------------------
