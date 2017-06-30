@@ -8,7 +8,7 @@ from cpython cimport array
 #cimport numpy as np
 
 """a and b is a tuple (i,j) where i is the column number(index in the solution array) and j is the row number(value in the solution array) """
-cpdef list attack(list a,list b):
+cdef list attack(int *a,int *b):
     cdef list result =[0,0]
     
     if a[0]==b[0]:
@@ -17,10 +17,10 @@ cpdef list attack(list a,list b):
          
         result[0] = 1
         if a[0] > b[0] :
-            result[1] = 1
+            result[1] = 4
         else:
             #result.append(4)
-            result[1] = 4
+            result[1] = 1
     elif b[0]-a[0] == b[1]-a[1] :
         #result.append(1)
         result[0] = 1
@@ -48,13 +48,16 @@ cpdef list attack(list a,list b):
     return result
 
 
-cpdef list test():
+
+#--------------python wrappers-------------------------
+#pattack() for unittest only
+def pattack(aa,bb):
     cdef int a[2]
-    a[0]=2
-    a[1]=3
+    a[0]=aa[0]
+    a[1]=aa[1]
     #a = [2,3]
     cdef int b[2]
-    b[0]=2
-    b[1]=3
+    b[0]=bb[0]
+    b[1]=bb[1]
     return attack(a,b)
 

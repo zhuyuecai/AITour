@@ -1,6 +1,10 @@
 ﻿import unittest
 import numpy as np
 from chess_visualization import index_to_image
+import pyximport
+pyximport.install()
+
+import chess_util
 
 class Test_visualization(unittest.TestCase):
     def setUp(self):
@@ -40,7 +44,17 @@ class Test_visualization(unittest.TestCase):
         self.assertEqual( (index_to_image(solution)- G).all(), False)
  
 
-
+class Test_util(unittest.TestCase):
+    def setUp(self):
+        pass
+    def test_attack(self):
+        self.assertEqual( chess_util.pattack([3,4],[4,4]), [1,1]) 
+        self.assertEqual( chess_util.pattack([3,4],[4,5]), [1,2]) 
+        self.assertEqual( chess_util.pattack([3,4],[2,5]), [1,3])
+        self.assertEqual( chess_util.pattack([3,4],[2,4]), [1,4])
+        self.assertEqual( chess_util.pattack([3,4],[2,3]), [1,5]) 
+        self.assertEqual( chess_util.pattack([3,4],[4,3]), [1,6])  
+        self.assertEqual( chess_util.pattack([3,4],[4,6]), [0,0])  
 
 
 

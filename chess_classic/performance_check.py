@@ -9,7 +9,7 @@ pyximport.install()
 
 import chess_util
 
-cProfile.runctx("chess_util.test()", globals(), locals(), "Profile.prof")
+cProfile.runctx("chess_util.test([2,3],[4,5])", globals(), locals(), "Profile.prof")
 
 s = pstats.Stats("Profile.prof")
 s.strip_dirs().sort_stats("time").print_stats()
