@@ -54,7 +54,9 @@ class Test_util(unittest.TestCase):
         self.assertEqual( chess_util.pattack([3,4],[2,4]), [1,4])
         self.assertEqual( chess_util.pattack([3,4],[2,3]), [1,5]) 
         self.assertEqual( chess_util.pattack([3,4],[4,3]), [1,6])  
-        self.assertEqual( chess_util.pattack([3,4],[4,6]), [0,0])  
+        self.assertEqual( chess_util.pattack([3,4],[4,6]), [0,0]) 
+    def test_count_all_attacks(self):
+         self.assertEqual( chess_util.count_all_attacks([3,4,2,3,5]), 3)
 
 
 

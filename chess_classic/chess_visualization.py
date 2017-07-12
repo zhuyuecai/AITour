@@ -68,7 +68,7 @@ def show_evaluation(data, fmt='{:.2f}', bkg_colors=['yellow', 'white']):
 
 
 if __name__== '__main__':
-    solution = [1,2,4,5,2]
+    solution = [3,4,2,3,5]
     print index_to_image(solution)
     #show_queens(solution)
     #data = pandas.DataFrame(np.random.random((5,5)))#,  columns=['A','B','C','D','E'])
