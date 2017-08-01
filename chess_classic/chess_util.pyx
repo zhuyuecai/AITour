@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 from matplotlib.table import Table
+from libc.stdlib cimport rand, RAND_MAX
 
 """
 a and b is a tuple (i,j) where i is the column number(index in the solution array) 
@@ -147,8 +148,11 @@ def show_evaluation(data, fmt='{:.2f}', bkg_colors=['yellow', 'white']):
         if val<0:
             tb.add_cell(i, j, width, height, text='Q', 
                     loc='center', facecolor=color)
-        else:
+        elif val > 0:
             tb.add_cell(i, j, width, height, text=fmt.format(val), 
+                    loc='center', facecolor=color)
+        else:
+            tb.add_cell(i, j, width, height, 
                     loc='center', facecolor=color)
 
     # Row Labels...
@@ -177,3 +181,29 @@ def test_visualization():
     show_evaluation(data)
 
     plt.show()
+
+"""
+@note: return a random solution based on the input number of queens
+"""
+cpdef list random_solution(int n_queens = 8):
+    cdef int i,tem 
+    cdef list solution=[]
+    for i in range(n_queens):
+        tem = int((rand()/float(RAND_MAX)* (n_queens-1)))
+        solution.append(tem)
+    return solution
+
+
+
+cpdef list get_sucessors(list solution): 
+    cdef int i,j,l = len(solution)
+    cdef list sucessors=[],new_solution
+    for i in range(l):
+        
+        for j in range(l):
+            new_solution = solution[:]
+            if solution[i] != j: 
+                new_solution[i] = j
+                sucessors.append(new_solution)
+            
+    return sucessors

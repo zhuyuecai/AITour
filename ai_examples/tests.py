@@ -1,8 +1,10 @@
 ﻿import unittest
 import numpy as np
+import sys
+sys.path.append('../')
 #from chess_visualization import index_to_image
-import pyximport
-pyximport.install()
+#import pyximport
+#pyximport.install()
 
 import chess_util
 
