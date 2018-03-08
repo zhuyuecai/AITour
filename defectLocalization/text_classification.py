@@ -55,23 +55,32 @@ def rnn_model(x, y, mode, params):
     # EMBEDDING_SIZE].
     word_vectors = learn.ops.categorical_variable(x, n_classes=n_words,
                                                   embedding_size=EMBEDDING_SIZE, name='words')
-
+    
     # Split into list of embedding per word, while removing doc length dim.
     # word_list results to be a list of tensors [batch_size, EMBEDDING_SIZE].
     word_list = tf.unstack(word_vectors, axis=1)
-
+    dim = tf.shape(word_list)
+    batch_size = dim[0]
+    print(batch_size)
     # Create a Gated Recurrent Unit cell with hidden size of EMBEDDING_SIZE.
     cell =tf.contrib.rnn.GRUCell(EMBEDDING_SIZE)
 
     # Create an unrolled Recurrent Neural Networks to length of
     # MAX_DOCUMENT_LENGTH and passes word_list as inputs for each unit.
-    _, encoding = tf.contrib.rnn(cell, word_list, dtype=tf.float32)
+
+    #_, encoding = tf.contrib.rnn(cell, word_list, dtype=tf.float32)
+
+    initial_state = cell.zero_state(batch_size, dtype=tf.float32)
+    initial_state = tf.identity(initial_state, name='initial_state')
+   # 'state' is a tensor of shape [batch_size, cell_state_size]
+    #expand_word_list =tf.expand_dims(word_list, axis = 1)
+    outputs, state = tf.nn.dynamic_rnn(cell, word_vectors,time_major = True,initial_state=initial_state, dtype=tf.float32)
 
     # Given encoding of RNN, take encoding of last step (e.g hidden size of the
     # neural network of last step) and pass it as features for logistic
     # regression over output classes.
     target = tf.one_hot(y, params.get("classes", 15), 1, 0)
-    prediction, loss = learn.models.logistic_regression(encoding, target)
+    prediction, loss = learn.models.logistic_regression(state, target)
 
     # Create a training op.
     train_op = tf.contrib.layers.optimize_loss(
@@ -83,6 +92,13 @@ def rnn_model(x, y, mode, params):
 
 def main(unused_argv):
     global n_words
+    """ 
+    config_t = tf.ConfigProto(allow_soft_placement=True)
+    config_t.gpu_options.allocator_type = 'BFC'
+    config_t.gpu_options.per_process_gpu_memory_fraction = 0.70
+    config_t.gpu_options.allow_growth=True
+    config_t.session_config = None
+    """
     # Prepare training and testing data
     # dbpedia = learn.datasets.load_dataset(
     #     'dbpedia', size="", test_with_fake_data=FLAGS.test_with_fake_data)
@@ -119,7 +135,7 @@ def main(unused_argv):
     classifier = learn.Estimator(model_fn=rnn_model, params={"classes": classes})
 
     # Train and predict
-    classifier.fit(x_train, y_train, steps=100)
+    classifier.fit(x_train, y_train, steps=1000)
     y_predicted = [
         p['class'] for p in classifier.predict(x_test, as_iterable=True)]
     score = metrics.accuracy_score(y_test, y_predicted)
@@ -127,4 +143,5 @@ def main(unused_argv):
 
 
 if __name__ == '__main__':
+
     tf.app.run()
