@@ -365,7 +365,7 @@ class LargeConfig(object):
   lr_decay = 1 / 1.15
   batch_size = 20
   vocab_size = 10000
-  rnn_mode = BASIC
+  rnn_mode = BLOCK
 
 
 class TestConfig(object):
