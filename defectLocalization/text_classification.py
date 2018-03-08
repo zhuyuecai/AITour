@@ -59,9 +59,9 @@ def rnn_model(x, y, mode, params):
     # Split into list of embedding per word, while removing doc length dim.
     # word_list results to be a list of tensors [batch_size, EMBEDDING_SIZE].
     word_list = tf.unstack(word_vectors, axis=1)
-    dim = tf.shape(word_list)
+    dim = tf.shape(word_vectors)
     batch_size = dim[0]
-    print(batch_size)
+ #   yield(batch_size)
     # Create a Gated Recurrent Unit cell with hidden size of EMBEDDING_SIZE.
     cell =tf.contrib.rnn.GRUCell(EMBEDDING_SIZE)
 
@@ -74,12 +74,13 @@ def rnn_model(x, y, mode, params):
     initial_state = tf.identity(initial_state, name='initial_state')
    # 'state' is a tensor of shape [batch_size, cell_state_size]
     #expand_word_list =tf.expand_dims(word_list, axis = 1)
-    outputs, state = tf.nn.dynamic_rnn(cell, word_vectors,time_major = True,initial_state=initial_state, dtype=tf.float32)
+    outputs, state = tf.nn.static_rnn(cell, word_list,initial_state=initial_state, dtype=tf.float32)
 
+    output = tf.reshape(tf.concat(outputs, 1), [-1, EMBEDDING_SIZE])
     # Given encoding of RNN, take encoding of last step (e.g hidden size of the
     # neural network of last step) and pass it as features for logistic
     # regression over output classes.
-    target = tf.one_hot(y, params.get("classes", 15), 1, 0)
+    target = tf.one_hot(y,35)
     prediction, loss = learn.models.logistic_regression(state, target)
 
     # Create a training op.
@@ -113,6 +114,7 @@ def main(unused_argv):
     classes = len(dataframe.component_id.unique())
     print("=" * 80)
     print("Dataframe loaded %s" % str(dataframe.shape))
+    print("total of classes: %s"%(classes))
 
     print("=" * 80)
     print("Test/Train split")
@@ -130,12 +132,14 @@ def main(unused_argv):
     n_words = len(vocab_processor.vocabulary_)
     print('Total words: %d' % n_words)
 
+    print("train data dimemsion:%s"%(str(x_train.shape)))
+    print("train target data dimemsion:%s"%(str(y_train.shape)))
     # Build model
     # classifier = learn.Estimator(model_fn=bag_of_words_model, params={"classes": classes})
     classifier = learn.Estimator(model_fn=rnn_model, params={"classes": classes})
 
     # Train and predict
-    classifier.fit(x_train, y_train, steps=1000)
+    classifier.fit(x_train, y_train, steps=200)
     y_predicted = [
         p['class'] for p in classifier.predict(x_test, as_iterable=True)]
     score = metrics.accuracy_score(y_test, y_predicted)
