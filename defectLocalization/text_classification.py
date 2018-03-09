@@ -108,7 +108,7 @@ def main(unused_argv):
     # x_test = pandas.DataFrame(dbpedia.test.data)[1]
     # y_test = pandas.Series(dbpedia.test.target)
 
-    dataframe = loadDataframe(db).head(10000)
+    dataframe = loadDataframe(db)
     # get rid of nans
     dataframe = dataframe.replace(np.nan, '', regex=True)
     classes = len(dataframe.component_id.unique())
@@ -142,7 +142,7 @@ def main(unused_argv):
     classifier.fit(x_train, y_train, steps=200)
     y_predicted = [
         p['class'] for p in classifier.predict(x_test, as_iterable=True)]
-    score = metrics.accuracy_score(y_test, y_predicted)
+    score = metrics.precision_recall_fscore_support(y_test, y_predicted)
     print('Accuracy: {0:f}'.format(score))
 
 
