@@ -80,7 +80,7 @@ def rnn_model(x, y, mode, params):
     # Given encoding of RNN, take encoding of last step (e.g hidden size of the
     # neural network of last step) and pass it as features for logistic
     # regression over output classes.
-    target = tf.one_hot(y,35)
+    target = tf.one_hot(y,params['classes'])
     prediction, loss = learn.models.logistic_regression(state, target)
 
     # Create a training op.
@@ -108,7 +108,7 @@ def main(unused_argv):
     # x_test = pandas.DataFrame(dbpedia.test.data)[1]
     # y_test = pandas.Series(dbpedia.test.target)
 
-    dataframe = loadDataframe(db)
+    dataframe = loadDataframe(db).head(100000)
     # get rid of nans
     dataframe = dataframe.replace(np.nan, '', regex=True)
     classes = len(dataframe.component_id.unique())
