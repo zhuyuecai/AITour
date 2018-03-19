@@ -17,11 +17,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 import numpy as np
-import pandas
+#import pandas
 from sklearn import metrics
 import tensorflow as tf
 from tensorflow.contrib import learn
-from utils import seed, db, loadDataframe
+#from utils import seed, db, loadDataframe
+from util_m import get_records 
 from sklearn.cross_validation import train_test_split
 
 FLAGS = tf.app.flags.FLAGS
@@ -75,24 +76,37 @@ def rnn_model(x, y, mode, params):
    # 'state' is a tensor of shape [batch_size, cell_state_size]
     #expand_word_list =tf.expand_dims(word_list, axis = 1)
     outputs, state = tf.nn.static_rnn(cell, word_list,initial_state=initial_state, dtype=tf.float32)
-
-    output = tf.reshape(tf.concat(outputs, 1), [-1, EMBEDDING_SIZE])
+    output = outputs[-1]
+    #output = tf.reshape(tf.concat(outputs, 1), [-1, EMBEDDING_SIZE])
+    #output = tf.transpose(outputs,[1,0,2])
+    #output = tf.gather(output, int(output.get_shape()[0]) - 1)
+    #output = [o[-1] for o in outputs]
     # Given encoding of RNN, take encoding of last step (e.g hidden size of the
     # neural network of last step) and pass it as features for logistic
     # regression over output classes.
-    target = tf.one_hot(y,params['classes'])
-    prediction, loss = learn.models.logistic_regression(state, target)
-
+    #target = tf.one_hot(y,params['classes'])
+    #prediction, loss = learn.models.logistic_regression(state, target)
+    #output = tf.transpose(output)
+    weight = tf.Variable(tf.truncated_normal([EMBEDDING_SIZE, params['classes']], stddev=0.1))
+    bias = tf.Variable(tf.constant(0.1, shape=[params['classes']]))
+    logits_out = tf.nn.xw_plus_b(output,weight,bias)
+    #logits_out = tf.matmul(output, weight) + bias
+    prediction = tf.nn.softmax(logits_out)
+    # Loss function
+    losses = tf.losses.mean_squared_error(prediction, y)
+    
+    #losses = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits_out, labels=y) # logits=float32, labels=int32
+    loss = tf.reduce_mean(losses)
     # Create a training op.
     train_op = tf.contrib.layers.optimize_loss(
         loss, tf.contrib.framework.get_global_step(),
         optimizer='Adam', learning_rate=0.01)
-
-    return {'class': tf.argmax(prediction, 1), 'prob': prediction}, loss, train_op
+    return {'class': tf.clip_by_value(prediction,0.5,0.5 ), 'prob': prediction}, loss, train_op
 
 
 def main(unused_argv):
     global n_words
+    path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/ZXingBugRepository.xml"
     """ 
     config_t = tf.ConfigProto(allow_soft_placement=True)
     config_t.gpu_options.allocator_type = 'BFC'
@@ -107,23 +121,46 @@ def main(unused_argv):
     # y_train = pandas.Series(dbpedia.train.target)
     # x_test = pandas.DataFrame(dbpedia.test.data)[1]
     # y_test = pandas.Series(dbpedia.test.target)
-
-    dataframe = loadDataframe(db).head(100000)
+    all_records =  get_records(path)
+    b = [y for x in all_records for y in x[3]]
+    classes = len(set(b))
+    dd=dict(zip(set(b),range(classes)))
+    one_hot = np.identity(classes)
+    #dataframe = loadDataframe(db).head(100000)
     # get rid of nans
-    dataframe = dataframe.replace(np.nan, '', regex=True)
-    classes = len(dataframe.component_id.unique())
+    #dataframe = dataframe.replace(np.nan, '', regex=True)
+    #classes = len(dataframe.component_id.unique())
+    
     print("=" * 80)
-    print("Dataframe loaded %s" % str(dataframe.shape))
+    #print("Dataframe loaded %s" % str(dataframe.shape))
     print("total of classes: %s"%(classes))
 
     print("=" * 80)
     print("Test/Train split")
-    train, test = train_test_split(dataframe, train_size=0.8, random_state=seed)
+    train, test = train_test_split(all_records, train_size=0.8)
 
-    x_train = train.text
-    y_train = train.component_id
-    x_test = test.text
-    y_test = test.component_id
+    y_train = np.zeros([classes,len(train)])
+    t = np.transpose(y_train)
+    x_train=[]
+    for i in range(len(train)):
+        x_train.append(train[i][2])
+        for u in train[i][3]:
+            t[i] += one_hot[dd[u]]
+    y_train = t
+  #  x_train = train.text
+   # y_train = train.component_id
+    
+    y_test = np.zeros([classes,len(test)])
+    t = np.transpose(y_test)
+    x_test=[]
+    for i in range(len(test)):
+        x_test.append(test[i][2])
+        for u in test[i][3]:
+            t[i] += one_hot[dd[u]]
+    y_test = t
+    
+    #x_test = test.text
+    #y_test = test.component_id
 
     # Process vocabulary
     vocab_processor = learn.preprocessing.VocabularyProcessor(MAX_DOCUMENT_LENGTH)
@@ -142,6 +179,9 @@ def main(unused_argv):
     classifier.fit(x_train, y_train, steps=200)
     y_predicted = [
         p['class'] for p in classifier.predict(x_test, as_iterable=True)]
+    y_predicted = np.array(y_predicted)
+    print(y_predicted)
+    print(y_test)
     score = metrics.precision_recall_fscore_support(y_test, y_predicted)
     print('Accuracy: {0:f}'.format(score))
 
