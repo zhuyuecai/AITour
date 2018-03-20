@@ -22,7 +22,7 @@ from sklearn import metrics
 import tensorflow as tf
 from tensorflow.contrib import learn
 #from utils import seed, db, loadDataframe
-from util_m import get_records 
+from util_m import * 
 from sklearn.cross_validation import train_test_split
 
 FLAGS = tf.app.flags.FLAGS
@@ -62,6 +62,8 @@ def rnn_model(x, y, mode, params):
     word_list = tf.unstack(word_vectors, axis=1)
     dim = tf.shape(word_vectors)
     batch_size = dim[0]
+    
+    target = tf.one_hot(y, params.get("classes", 15), 1, 0)
  #   yield(batch_size)
     # Create a Gated Recurrent Unit cell with hidden size of EMBEDDING_SIZE.
     cell =tf.contrib.rnn.GRUCell(EMBEDDING_SIZE)
@@ -84,24 +86,24 @@ def rnn_model(x, y, mode, params):
     # Given encoding of RNN, take encoding of last step (e.g hidden size of the
     # neural network of last step) and pass it as features for logistic
     # regression over output classes.
-    #target = tf.one_hot(y,params['classes'])
-    #prediction, loss = learn.models.logistic_regression(state, target)
+    prediction, loss = learn.models.logistic_regression(state, target)
     #output = tf.transpose(output)
-    weight = tf.Variable(tf.truncated_normal([EMBEDDING_SIZE, params['classes']], stddev=0.1))
-    bias = tf.Variable(tf.constant(0.1, shape=[params['classes']]))
-    logits_out = tf.nn.xw_plus_b(output,weight,bias)
+    #weight = tf.Variable(tf.truncated_normal([EMBEDDING_SIZE, params['classes']], stddev=0.1))
+    #bias = tf.Variable(tf.constant(0.1, shape=[params['classes']]))
+    #logits_out = tf.nn.xw_plus_b(output,weight,bias)
     #logits_out = tf.matmul(output, weight) + bias
-    prediction = tf.nn.softmax(logits_out)
+    #prediction = tf.nn.softmax(logits_out)
     # Loss function
-    losses = tf.losses.mean_squared_error(prediction, y)
+    #losses = tf.losses.mean_squared_error(prediction, y)
     
     #losses = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits_out, labels=y) # logits=float32, labels=int32
-    loss = tf.reduce_mean(losses)
+    #loss = tf.reduce_mean(losses)
     # Create a training op.
     train_op = tf.contrib.layers.optimize_loss(
         loss, tf.contrib.framework.get_global_step(),
         optimizer='Adam', learning_rate=0.01)
-    return {'class': tf.clip_by_value(prediction,0.5,0.5 ), 'prob': prediction}, loss, train_op
+    
+    return {'class': tf.argmax(prediction,1 ), 'prob': prediction}, loss, train_op
 
 
 def main(unused_argv):
@@ -121,6 +123,8 @@ def main(unused_argv):
     # y_train = pandas.Series(dbpedia.train.target)
     # x_test = pandas.DataFrame(dbpedia.test.data)[1]
     # y_test = pandas.Series(dbpedia.test.target)
+    
+    doc =  get_data(path)
     all_records =  get_records(path)
     b = [y for x in all_records for y in x[3]]
     classes = len(set(b))
@@ -137,8 +141,14 @@ def main(unused_argv):
 
     print("=" * 80)
     print("Test/Train split")
-    train, test = train_test_split(all_records, train_size=0.8)
-
+    train, test = train_test_split(doc, train_size=0.8)
+    train_records = []
+    [get_flat_record(d,train_records) for d in train]
+    np.random.shuffle(train_records)
+    y_train= [dd[x[3]] for x in train_records ]
+    x_train= [y for x[2] in train_records]
+    #y_train = tf.one_hot(y_train_raw,params['classes'])
+    """
     y_train = np.zeros([classes,len(train)])
     t = np.transpose(y_train)
     x_train=[]
@@ -147,17 +157,23 @@ def main(unused_argv):
         for u in train[i][3]:
             t[i] += one_hot[dd[u]]
     y_train = t
+    """
   #  x_train = train.text
    # y_train = train.component_id
-    
-    y_test = np.zeros([classes,len(test)])
-    t = np.transpose(y_test)
+    test_records = []
+
+    [get_single_record(d,test_records) for d in test]
+    #y_test = np.zeros([classes,len(test_records)])
+    #t = np.transpose(y_test)
     x_test=[]
-    for i in range(len(test)):
-        x_test.append(test[i][2])
-        for u in test[i][3]:
-            t[i] += one_hot[dd[u]]
-    y_test = t
+    y_test = []
+    for i in range(len(test_records)):
+        x_test.append(test_records[i][2])
+        #y_test.append(test_records[i][3])
+        y_test.append([dd[u] for u in test_records[i][3]])
+            #t[i] += one_hot[dd[u]]
+       #     t[i]
+   # y_test = t
     
     #x_test = test.text
     #y_test = test.component_id
@@ -170,7 +186,7 @@ def main(unused_argv):
     print('Total words: %d' % n_words)
 
     print("train data dimemsion:%s"%(str(x_train.shape)))
-    print("train target data dimemsion:%s"%(str(y_train.shape)))
+    print("train target data dimemsion:%s"%(len(y_train)))
     # Build model
     # classifier = learn.Estimator(model_fn=bag_of_words_model, params={"classes": classes})
     classifier = learn.Estimator(model_fn=rnn_model, params={"classes": classes})
@@ -178,13 +194,12 @@ def main(unused_argv):
     # Train and predict
     classifier.fit(x_train, y_train, steps=200)
     y_predicted = [
-        p['prob'] for p in classifier.predict(x_test, as_iterable=True)]
+        np.argsort(p['prob']) for p in classifier.predict(x_test, as_iterable=True)]
     
-    y_predicted = np.array(y_predicted)
     print(y_predicted)
     print(y_test)
-    score = metrics.precision_recall_fscore_support(y_test, y_predicted)
-    print('Accuracy: {0:f}'.format(score))
+    #score = metrics.precision_recall_fscore_support(y_test, y_predicted)
+    #print('Accuracy: {0:f}'.format(score))
 
 
 if __name__ == '__main__':
