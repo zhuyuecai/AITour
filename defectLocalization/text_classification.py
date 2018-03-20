@@ -86,7 +86,7 @@ def rnn_model(x, y, mode, params):
     # Given encoding of RNN, take encoding of last step (e.g hidden size of the
     # neural network of last step) and pass it as features for logistic
     # regression over output classes.
-    prediction, loss = learn.models.logistic_regression(state, target)
+    prediction, loss = learn.models.logistic_regression(output, target)
     #output = tf.transpose(output)
     #weight = tf.Variable(tf.truncated_normal([EMBEDDING_SIZE, params['classes']], stddev=0.1))
     #bias = tf.Variable(tf.constant(0.1, shape=[params['classes']]))
