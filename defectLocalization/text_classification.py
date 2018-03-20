@@ -178,7 +178,8 @@ def main(unused_argv):
     # Train and predict
     classifier.fit(x_train, y_train, steps=200)
     y_predicted = [
-        p['class'] for p in classifier.predict(x_test, as_iterable=True)]
+        p['prob'] for p in classifier.predict(x_test, as_iterable=True)]
+    
     y_predicted = np.array(y_predicted)
     print(y_predicted)
     print(y_test)
