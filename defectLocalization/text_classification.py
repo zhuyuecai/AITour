@@ -20,7 +20,8 @@ import numpy as np
 #import pandas
 from sklearn import metrics
 import tensorflow as tf
-from tensorflow.contrib import learn
+#from tensorflow.contrib import learn
+from tensorflow.contrib import rnn # use for old version tensorflow
 #from utils import seed, db, loadDataframe
 from util_m import * 
 from sklearn.cross_validation import train_test_split
@@ -76,7 +77,10 @@ def rnn_model(x, y, mode, params):
     initial_state = tf.identity(initial_state, name='initial_state')
    # 'state' is a tensor of shape [batch_size, cell_state_size]
     #expand_word_list =tf.expand_dims(word_list, axis = 1)
-    outputs, state = tf.nn.static_rnn(cell, word_list,initial_state=initial_state, dtype=tf.float32)
+    # new tensorflow use this
+    #outputs, state = tf.nn.static_rnn(cell, word_list,initial_state=initial_state, dtype=tf.float32)
+    # old tensorflow use this
+    outputs, state = rnn.static_rnn(cell, word_list,initial_state=initial_state, dtype=tf.float32)
     output = outputs[-1]
     #output = tf.reshape(tf.concat(outputs, 1), [-1, EMBEDDING_SIZE])
     #output = tf.transpose(outputs,[1,0,2])
