@@ -151,7 +151,9 @@ class PTBModel(object):
     # Update the cost
     self._cost = tf.reduce_sum(loss)
     self._final_state = state
-
+    
+    # dummy perplexity for summary in tensorboard
+    self.perplexity = 0
     if not is_training:
       return
 
@@ -359,11 +361,11 @@ class LargeConfig(object):
   num_layers = 2
   num_steps = 35
   hidden_size = 1500
-  max_epoch = 14
-  max_max_epoch = 55
+  max_epoch = 3
+  max_max_epoch = 10
   keep_prob = 0.35
   lr_decay = 1 / 1.15
-  batch_size = 20
+  batch_size = 80
   vocab_size = 10000
   rnn_mode = BLOCK
 
@@ -411,14 +413,14 @@ def run_epoch(session, model, eval_op=None, verbose=False):
 
     costs += cost
     iters += model.input.num_steps
-
+    perplexity = np.exp(costs / iters)
     if verbose and step % (model.input.epoch_size // 10) == 10:
       print("%.3f perplexity: %.3f speed: %.0f wps" %
-            (step * 1.0 / model.input.epoch_size, np.exp(costs / iters),
+            (step * 1.0 / model.input.epoch_size, perplexity,
              iters * model.input.batch_size * max(1, FLAGS.num_gpus) /
              (time.time() - start_time)))
 
-  return np.exp(costs / iters)
+  return perplexity
 
 
 def get_config():
@@ -442,6 +444,7 @@ def get_config():
 
 
 def main(_):
+  per_list = []
   if not FLAGS.data_path:
     raise ValueError("Must set --data_path to PTB data directory")
   gpus = [
@@ -471,6 +474,7 @@ def main(_):
         m = PTBModel(is_training=True, config=config, input_=train_input)
       tf.summary.scalar("Training Loss", m.cost)
       tf.summary.scalar("Learning Rate", m.lr)
+      #tf.summary.scalar("Training perplexity",m.perplexity)
 
     with tf.name_scope("Valid"):
       valid_input = PTBInput(config=config, data=valid_data, name="ValidInput")
@@ -511,6 +515,7 @@ def main(_):
         print("Epoch: %d Learning rate: %.3f" % (i + 1, session.run(m.lr)))
         train_perplexity = run_epoch(session, m, eval_op=m.train_op,
                                      verbose=True)
+        per_list.append(train_perplexity)
         print("Epoch: %d Train Perplexity: %.3f" % (i + 1, train_perplexity))
         valid_perplexity = run_epoch(session, mvalid)
         print("Epoch: %d Valid Perplexity: %.3f" % (i + 1, valid_perplexity))
@@ -521,7 +526,7 @@ def main(_):
       if FLAGS.save_path:
         print("Saving model to %s." % FLAGS.save_path)
         sv.saver.save(session, FLAGS.save_path, global_step=sv.global_step)
-
-
+  with open("./output.log",'w') as f:
+      f.write(per_list)
 if __name__ == "__main__":
   tf.app.run()
