@@ -33,6 +33,32 @@ def get_records(path):
     return all_records
 
 
+def precision_score(y_true, y_predict):
+    total_selected = len(y_predict)
+    hit_elements = [i for i in y_predict if i in y_true]
+    hit = float(len(hit_elements))
+    return (hit/total_selected)
+
+
+def recall_score(y_true, y_predict):
+    total_relevant = len(y_true)
+    hit_elements = [i for i in y_predict if i in y_true]
+    hit = float(len(hit_elements))
+    return (hit/total_relevant)
+
+
+def hit_or_not(y_true,y_predict):
+    hit = 0
+    for i in y_predict:
+        if i in y_true:
+            hit = 1
+            break
+    return (hit)
+
+
+
+
+
 if __name__ == "__main__":
     path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/ZXingBugRepository.xml"
     all_records = []

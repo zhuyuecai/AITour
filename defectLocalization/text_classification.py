@@ -32,8 +32,7 @@ tf.app.flags.DEFINE_bool('test_with_fake_data', False,
 MAX_DOCUMENT_LENGTH = 250
 EMBEDDING_SIZE = 100
 n_words = 0
-
-
+save_path = "./output.log"
 def bag_of_words_model(x, y, mode, params):
     """A bag-of-words model. Note it disregards the word order in the text."""
     target = tf.one_hot(y, params.get("classes", 15), 1, 0)
@@ -109,7 +108,8 @@ def rnn_model(x, y, mode, params):
 def main(unused_argv):
     global n_words
     path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/ZXingBugRepository.xml"
-    """ 
+    out_log = open(save_path, 'w')  
+    """
     config_t = tf.ConfigProto(allow_soft_placement=True)
     config_t.gpu_options.allocator_type = 'BFC'
     config_t.gpu_options.per_process_gpu_memory_fraction = 0.70
@@ -135,12 +135,12 @@ def main(unused_argv):
     #dataframe = dataframe.replace(np.nan, '', regex=True)
     #classes = len(dataframe.component_id.unique())
     
-    print("=" * 80)
+    out_log.write("=================\n")
     #print("Dataframe loaded %s" % str(dataframe.shape))
-    print("total of classes: %s"%(classes))
-
-    print("=" * 80)
-    print("Test/Train split")
+    out_log.write("total of classes: %s; "%(classes))
+    out_log.write("total bugs: %s; "%(len(all_records)))
+    out_log.write("=================\n")
+    out_log.write("Test/Train split")
     train, test = train_test_split(doc, train_size=0.8)
     train_records = []
     [get_flat_record(d,train_records) for d in train]
@@ -183,10 +183,10 @@ def main(unused_argv):
     x_train = np.array(list(vocab_processor.fit_transform(x_train)))
     x_test = np.array(list(vocab_processor.transform(x_test)))
     n_words = len(vocab_processor.vocabulary_)
-    print('Total words: %d' % n_words)
+    out_log.write('Total words: %d ; ' % n_words)
 
-    print("train data dimemsion:%s"%(str(x_train.shape)))
-    print("train target data dimemsion:%s"%(len(y_train)))
+    out_log.write("train data dimemsion:%s ;"%(str(x_train.shape)))
+    out_log.write("train target data dimemsion:%s; "%(len(y_train)))
     # Build model
     # classifier = learn.Estimator(model_fn=bag_of_words_model, params={"classes": classes})
     classifier = learn.Estimator(model_fn=rnn_model, params={"classes": classes})
@@ -195,13 +195,49 @@ def main(unused_argv):
     classifier.fit(x_train, y_train, steps=200)
     y_predicted = [
         np.argsort(p['prob']) for p in classifier.predict(x_test, as_iterable=True)]
+    n_test=len(y_test)
+    ap_array = np.zeros(n_test)
+    for n_return in range(1,classes+1):
+        precision = []
+        recall = []
+        fscore = [] 
+        hit = 0
+        for i in range(n_test):
+            y_predicted_selected = y_predicted[i][:n_return]
+            p = precision_score(y_test[i], y_predicted_selected)
+            r = recall_score(y_test[i], y_predicted_selected)
+            try:
+                f = 2 *( p * r / (p+r))
+            except:
+                f = 0
+            precision.append(p)
+            recall.append(r)
+            fscore.append(f)
+            hit+=hit_or_not(y_test[i], y_predicted_selected)
+            if y_predicted[i][(n_return-1)] in y_test[i]:
+                ap_array[i]+=p
+        #score = metrics.precision_recall_fscore_support(y_test, y_predicted)
+        out_log.write('For top %s \n'%(n_return))
+        out_log.write('Precision: {0:f} \n'.format(np.mean(precision)))
+        out_log.write('Recall: {0:f} \n'.format(np.mean(recall)))
+        out_log.write('fscore: {0:f} \n'.format(np.mean(fscore)))
+        out_log.write("Top %s hit: %s\n"%(n_return,hit))
+        out_log.write("=========================================\n")
+    #===MRR==================
+    RR = 0
+    for i in range(n_test):
+        ap_array[i]= ap_array[i]/len(y_test[i])
+        for j in range(classes):
+            if y_predicted[i][j] in y_test[i]:
+                RR+=1/float(j+1)
+                break
+    MRR=RR/n_test
+    MAP = np.mean(ap_array)
+    out_log.write("MRR: %s \n"%(MRR))
+    out_log.write("MAP: %s \n"%(MAP))
     
-    print(y_predicted)
-    print(y_test)
-    #score = metrics.precision_recall_fscore_support(y_test, y_predicted)
-    #print('Accuracy: {0:f}'.format(score))
 
-
+    out_log.close()
 if __name__ == '__main__':
 
     tf.app.run()
