@@ -60,7 +60,7 @@ def hit_or_not(y_true,y_predict):
 
 
 if __name__ == "__main__":
-    path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/ZXingBugRepository.xml"
+    path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/EclipseBugRepository.xml"
     all_records = []
     doc =  get_data(path)
     [get_single_record(d,all_records) for d in doc]

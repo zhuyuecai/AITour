@@ -107,7 +107,7 @@ def rnn_model(x, y, mode, params):
 
 def main(unused_argv):
     global n_words
-    path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/ZXingBugRepository.xml"
+    path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/EclipseBugRepository.xml"
     out_log = open(save_path, 'w')  
     """
     config_t = tf.ConfigProto(allow_soft_placement=True)
@@ -140,13 +140,15 @@ def main(unused_argv):
     out_log.write("total of classes: %s; "%(classes))
     out_log.write("total bugs: %s; "%(len(all_records)))
     out_log.write("=================\n")
-    out_log.write("Test/Train split")
+    out_log.write("Test/Train split\n")
     train, test = train_test_split(doc, train_size=0.8)
+    out_log.write("train recodes: %s \n"%(len(train)))
+    out_log.write("test recodes: %s \n"%(len(test)))
     train_records = []
     [get_flat_record(d,train_records) for d in train]
     np.random.shuffle(train_records)
-    y_train= [dd[x[3]] for x in train_records ]
-    x_train= [y for x[2] in train_records]
+    y_train= [dd[x[3]] for x in train_records if x[2] is not None]
+    x_train= [ x[2] for x in train_records if x[2] is not None]
     #y_train = tf.one_hot(y_train_raw,params['classes'])
     """
     y_train = np.zeros([classes,len(train)])
@@ -168,16 +170,16 @@ def main(unused_argv):
     x_test=[]
     y_test = []
     for i in range(len(test_records)):
-        x_test.append(test_records[i][2])
+        if test_records[i][2] is not None:
+            x_test.append(test_records[i][2])
         #y_test.append(test_records[i][3])
-        y_test.append([dd[u] for u in test_records[i][3]])
+            y_test.append([dd[u] for u in test_records[i][3]])
             #t[i] += one_hot[dd[u]]
        #     t[i]
    # y_test = t
     
     #x_test = test.text
     #y_test = test.component_id
-
     # Process vocabulary
     vocab_processor = learn.preprocessing.VocabularyProcessor(MAX_DOCUMENT_LENGTH)
     x_train = np.array(list(vocab_processor.fit_transform(x_train)))
