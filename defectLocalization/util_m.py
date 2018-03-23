@@ -9,15 +9,22 @@ def get_single_record(record,in_list):
     bug_id=record['@id']
     fixed_files = record['fixedFiles']['file']
     if isinstance(fixed_files, basestring):
-       in_list.append([bug_id,info['summary'],info['description'],[fixed_files]])
+       splited_file = fixed_files.split('.')
+       if len(splited_file)>2:
+           in_list.append([bug_id,info['summary'],info['description'].replace("."," "),[".".join(splited_file[:-2])]])
     else:
-       #for f in fixed_files:
-       in_list.append([bug_id,info['summary'],info['description'],fixed_files])
+       splited_files = []
+       for f in fixed_files:
+           splited_file = f.split('.')
+           if len(splited_file)>2:
+               splited_files.append(".".join(splited_file[:-2]))
+          
+       in_list.append([bug_id,info['summary'],info['description'].replace("."," "),splited_files])
     return 0
 def get_flat_record(record, in_list):
 
-    info = record['buginformation']
-    bug_id=record['@id']
+#  info = record['buginformation']
+#   bug_id=record['@id']
     fixed_files = record['fixedFiles']['file']
     if isinstance(fixed_files, basestring):
        in_list.append([bug_id,info['summary'],info['description'],fixed_files])
@@ -29,7 +36,7 @@ def get_flat_record(record, in_list):
 def get_records(path):
     all_records = []
     doc =  get_data(path)
-    [get_single_record(d,all_records) for d in doc]
+    [get_single_record(d,all_records) for d in doc if d['buginformation']['description'] is not None]
     return all_records
 
 
@@ -63,11 +70,27 @@ if __name__ == "__main__":
     path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/EclipseBugRepository.xml"
     all_records = []
     doc =  get_data(path)
-    [get_single_record(d,all_records) for d in doc]
-    print(all_records[0:3])
-    print("====================================")
-    all_records = []
+    #[get_single_record(d,all_records) for d in doc]
+    #print(all_records[0:3])
+    #print("====================================")
+    #all_records = []
     [get_flat_record(d,all_records) for d in doc]
-    print(all_records[0:3])
+    le = []
+    bugs = []
+    for r in all_records:
+
+       ss = r[3].split('.')
+       if len(ss) > 1:
+           bugs.append(".".join(ss[:-1]))
+       #le.append(len( r[3].split('.')))
+
+    #print(max(le))
+    #print(min(le))
+    
+    print(len(bugs))
+    sbug = set(bugs)
+    print(len(sbug))
+
+
 
 

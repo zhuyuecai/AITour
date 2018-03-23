@@ -20,7 +20,7 @@ import numpy as np
 #import pandas
 from sklearn import metrics
 import tensorflow as tf
-#from tensorflow.contrib import learn
+from tensorflow.contrib import learn
 from tensorflow.contrib import rnn # use for old version tensorflow
 #from utils import seed, db, loadDataframe
 from util_m import * 
@@ -145,11 +145,10 @@ def main(unused_argv):
     out_log.write("total bugs: %s; "%(len(all_records)))
     out_log.write("=================\n")
     out_log.write("Test/Train split\n")
-    train, test = train_test_split(doc, train_size=0.8)
+    train, test = train_test_split(all_records, train_size=0.8)
     out_log.write("train recodes: %s \n"%(len(train)))
     out_log.write("test recodes: %s \n"%(len(test)))
-    train_records = []
-    [get_flat_record(d,train_records) for d in train]
+    train_records = [[d[0],d[1],d[2],f] for d in train for f in d[3]]
     np.random.shuffle(train_records)
     y_train= [dd[x[3]] for x in train_records if x[2] is not None]
     x_train= [ x[2] for x in train_records if x[2] is not None]
@@ -166,9 +165,9 @@ def main(unused_argv):
     """
   #  x_train = train.text
    # y_train = train.component_id
-    test_records = []
+    test_records = test
 
-    [get_single_record(d,test_records) for d in test]
+ #   [get_single_record(d,test_records) for d in test]
     #y_test = np.zeros([classes,len(test_records)])
     #t = np.transpose(y_test)
     x_test=[]
@@ -190,15 +189,15 @@ def main(unused_argv):
     x_test = np.array(list(vocab_processor.transform(x_test)))
     n_words = len(vocab_processor.vocabulary_)
     out_log.write('Total words: %d ; ' % n_words)
-
+    
     out_log.write("train data dimemsion:%s ;"%(str(x_train.shape)))
     out_log.write("train target data dimemsion:%s; "%(len(y_train)))
     # Build model
-    # classifier = learn.Estimator(model_fn=bag_of_words_model, params={"classes": classes})
-    classifier = learn.Estimator(model_fn=rnn_model, params={"classes": classes})
+    classifier = learn.Estimator(model_fn=bag_of_words_model, params={"classes": classes})
+    #classifier = learn.Estimator(model_fn=rnn_model, params={"classes": classes})
 
     # Train and predict
-    classifier.fit(x_train, y_train, steps=200)
+    classifier.fit(x_train, y_train, steps=100)
     y_predicted = [
         np.argsort(p['prob']) for p in classifier.predict(x_test, as_iterable=True)]
     n_test=len(y_test)
