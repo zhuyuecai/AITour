@@ -1,0 +1,77 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{3}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[\protect\citeauthoryear{Hellendoorn and Devanbu}{Hellendoorn and
+  Devanbu}{2017}]%
+        {hellendoorn2017deep}
+\bibfield{author}{\bibinfo{person}{Vincent~J Hellendoorn} {and}
+  \bibinfo{person}{Premkumar Devanbu}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{Are deep neural networks the best choice for
+  modeling source code?}. In \bibinfo{booktitle}{\emph{Proceedings of the 2017
+  11th Joint Meeting on Foundations of Software Engineering}}. ACM,
+  \bibinfo{pages}{763--773}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Lam, Nguyen, Nguyen, and Nguyen}{Lam
+  et~al\mbox{.}}{2017}]%
+        {lam2017bug}
+\bibfield{author}{\bibinfo{person}{An~Ngoc Lam}, \bibinfo{person}{Anh~Tuan
+  Nguyen}, \bibinfo{person}{Hoan~Anh Nguyen}, {and} \bibinfo{person}{Tien~N
+  Nguyen}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{Bug localization with combination of deep learning
+  and information retrieval}. In \bibinfo{booktitle}{\emph{Program
+  Comprehension (ICPC), 2017 IEEE/ACM 25th International Conference on}}. IEEE,
+  \bibinfo{pages}{218--229}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Zhou, Zhang, and Lo}{Zhou
+  et~al\mbox{.}}{2012}]%
+        {zhou2012should}
+\bibfield{author}{\bibinfo{person}{Jian Zhou}, \bibinfo{person}{Hongyu Zhang},
+  {and} \bibinfo{person}{David Lo}.} \bibinfo{year}{2012}\natexlab{}.
+\newblock \showarticletitle{Where should the bugs be fixed?-more accurate
+  information retrieval-based bug localization based on bug reports}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 34th International Conference on
+  Software Engineering}}. IEEE Press, \bibinfo{pages}{14--24}.
+\newblock
+
+
+\end{thebibliography}

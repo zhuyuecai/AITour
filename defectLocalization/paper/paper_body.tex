@@ -1,0 +1,17 @@
+\section{Introduction}
+Bug localization is one of the important steps in software maintenance.
+Especially in issue triaging, where triager has to predict the potential defected components based on his understanding to the issue and to the system, and assign the issue to the right developer who has the required knowledge.
+Automating this step helps speed up bugs fixing and reduce costs in issue triaging.
+Lam \etal\cite{lam2017bug} proposed the state of the art approach to automate bug localization by ensemble rVSM\cite{zhou2012should} and DNN.  
+Similar as most of the existed algorithms, this approach require source code information which is not always available to triagers or the QA team in large companies with code security requirement.
+Analyzing the code base dramatically increase the learning time of this kind of algorithm in large projects.
+Moreover, the fast evolution of source code further penalizes this approach that the predictive model has to be updated frequently.   
+In this paper, we explore the possibility to predict defected components solely based on information learned from bug reports.
+
+Recurrent neural network(RNN) has been proved to be efficient in capturing semantic as well as syntactic information from text to build statistical language models.
+But for source code, Hellendoorn \etal show that the RNN is not better than traditional IR method in language model building\cite{hellendoorn2017deep}.
+Bug report is different from common text and source code in that it is generally composed by common text and source code segment or error trace message. 
+We believe that IR method and RNN can learn different information from bug reports and could complement each other.
+Thus the ensemble of these two could offer better performance than using only one of them.
+
+The contribution of this paper is in two folds:  

@@ -1,0 +1,60 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: project_paper.aux
+The style file: ACM-Reference-Format.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: bibliography.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=20001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--empty publisher in hellendoorn2017deep
+Warning--empty address in hellendoorn2017deep
+Warning--empty publisher in lam2017bug
+Warning--empty address in lam2017bug
+Warning--empty publisher in zhou2012should
+Warning--empty address in zhou2012should
+You've used 3 entries,
+            5733 wiz_defined-function locations,
+            1467 strings with 17251 characters,
+and the built_in function-call counts, 3945 in all, are:
+= -- 408
+> -- 131
+< -- 0
++ -- 43
+- -- 44
+* -- 265
+:= -- 393
+add.period$ -- 15
+call.type$ -- 3
+change.case$ -- 21
+chr.to.int$ -- 3
+cite$ -- 9
+duplicate$ -- 380
+empty$ -- 262
+format.name$ -- 56
+if$ -- 909
+int.to.chr$ -- 2
+int.to.str$ -- 1
+missing$ -- 15
+newline$ -- 61
+num.names$ -- 24
+pop$ -- 157
+preamble$ -- 1
+purify$ -- 48
+quote$ -- 0
+skip$ -- 142
+stack$ -- 0
+substring$ -- 301
+swap$ -- 40
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 90
+warning$ -- 6
+while$ -- 25
+width$ -- 0
+write$ -- 90
+(There were 6 warnings)
