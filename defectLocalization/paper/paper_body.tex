@@ -1,8 +1,8 @@
 \section{Introduction}
 Bug localization is one of the important steps in software maintenance.
-Especially in issue triaging, where triager has to predict the potential defected components based on his understanding to the issue and to the system, and assign the issue to the right developer who has the required knowledge.
+Especially in issue triaging, where triager has to predict the potential defected components based on his understanding to the issue and the system, then he needs to assign the issue to the right developer who has the required knowledge to fix it.
 Automating this step helps speed up bugs fixing and reduce costs in issue triaging.
-Lam \etal\cite{lam2017bug} proposed the state of the art approach to automate bug localization by ensemble rVSM\cite{zhou2012should} and DNN.  
+Lam \etal\cite{lam2017bug} proposed the state of the art approach to automate bug localization by ensemble revised Vector Space Model(rVSM)\cite{zhou2012should} and Deep Neural Network(DNN).  
 Similar as most of the existed algorithms, this approach require source code information which is not always available to triagers or the QA team in large companies with code security requirement.
 Analyzing the code base dramatically increase the learning time of this kind of algorithm in large projects.
 Moreover, the fast evolution of source code further penalizes this approach that the predictive model has to be updated frequently.   
@@ -15,3 +15,66 @@ We believe that IR method and RNN can learn different information from bug repor
 Thus the ensemble of these two could offer better performance than using only one of them.
 
 The contribution of this paper is in two folds:  
+\begin{itemize}
+	\item an ensemble of naive tf-idf based VSM and Gated Recurrent Network to recommend high risk components solely based on bug reports.
+	\item By analyzing the performence of the naive tf-idf based VSM and Gated Recurrent Network on their own, and the ensemble of these two, we show that IR method and RNN can learn different information from bug reports and could complement each other to offer better performance in the ensemble method.
+\end{itemize}
+
+\section{Background}
+\subsection{Bug Localization In Post-release Software Quality Insurrance}
+One of the main purpose of software engineering is to deliver high quality product to cients.
+However, as software architecture getting more and more complex, the possibility of introducing bugs in the development being higher and higher.  
+Different approaches are adopted in the industry to reduce the risk of delivering defeted product, test driven development, unit testing, test regression, peer review etc.
+But there are still bugs found by the client after release. 
+In this case, being able to fastly locate the defeted components and hence assign the rigth developer to fix the customer reported bugs is critical to post-release software quality insurrance. 
+
+The traditional way is to do the assigning based on the triager's experience and his understanding of the reported issue. 
+For experienced triager, they could spot light some potential defected location very fast and accurate.
+But for triager with less experience or even new to the project, the process could take longer time and the prediction would not be correct.
+Thus they may assign a wrong developer for the issue and reassigning would be required and a longer time to get the bug fixed. 
+
+To help address this problem, recent research applies NLP techniques to learn from bug reports and suggest a ranked list of potential defect location\cite{gay2009use}\cite{lam2017bug}\cite{nguyen2011topic}\cite{zhou2012should}\cite{saha2013improving}\cite{shokripour2013so}, or to suggest the developer who could fix the bug\cite{anvik2011reducing}\cite{bhattacharya2010fine}\cite{xuan2012developer}\cite{jonsson2016automated}.
+All these approaches focus on combining source code and code change history from version controling tools(ex: Git)  with bug reports to make the prediction.
+However, in companies that has a strict source code security policy, which is a common situation for large companies, source code or even code change history is not available for triagers. 
+Bug report is the only source of information they can use to perform the triaging.   
+Therefore, in this work we focus on bug localization with only bug reports as the input source.
+
+
+\subsection{Information Retrieval From Bug Report}
+
+
+
+
+\section{Methodology}
+
+\subsection{Vector Space Model}
+
+\subsection{TF-IDF}
+
+
+\subsection{Gated Recurrent Unit}
+	
+\subsection{Ensemble of VSM and GRU}
+	
+\section{Experiment Design}
+
+\subsection{Data Set and Preprocessing}
+
+\subsection{Metrics}
+
+\section{Evaluation and Discussion}
+
+\subsection{Evaluation Result}
+
+\subsection{Is RNN Better Than IR Methods in Mining Bug Report ?}
+
+\subsection{title}
+
+
+
+
+
+
+
+
+	 
