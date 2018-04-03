@@ -1,4 +1,5 @@
 import xmltodict
+import re
 def get_data(path):
     with open(path,'r') as f:
         doc = xmltodict.parse(f.read())
@@ -6,12 +7,18 @@ def get_data(path):
 
 def get_single_record(record,in_list):
     info = record['buginformation']
+    clean_info = info['description'].replace("."," ")
+    clean_info = clean_info.replace("/"," ")
+    clean_info = clean_info.replace("_"," ")
+
+    clean_info = re.sub(r"\d+" ,"",clean_info)
+    clean_info = re.sub(r"[\[\]\{\}\#\$\^\%]" ," ",clean_info)
     bug_id=record['@id']
     fixed_files = record['fixedFiles']['file']
     if isinstance(fixed_files, basestring):
        splited_file = fixed_files.split('.')
        if len(splited_file)>2:
-           in_list.append([bug_id,info['summary'],info['description'].replace("."," "),[".".join(splited_file[:-2])]])
+           in_list.append([bug_id,info['summary'],clean_info,[".".join(splited_file[:-2])]])
     else:
        splited_files = []
        for f in fixed_files:
@@ -19,7 +26,7 @@ def get_single_record(record,in_list):
            if len(splited_file)>2:
                splited_files.append(".".join(splited_file[:-2]))
           
-       in_list.append([bug_id,info['summary'],info['description'].replace("."," "),splited_files])
+       in_list.append([bug_id,info['summary'],clean_info,splited_files])
     return 0
 def get_flat_record(record, in_list):
 

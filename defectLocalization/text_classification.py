@@ -25,6 +25,8 @@ from tensorflow.contrib import rnn # use for old version tensorflow
 #from utils import seed, db, loadDataframe
 from util_m import * 
 from sklearn.cross_validation import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+import nltk
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_bool('test_with_fake_data', False,
@@ -34,6 +36,10 @@ MAX_DOCUMENT_LENGTH = 250
 EMBEDDING_SIZE = 100
 n_words = 0
 save_path = "./output.log"
+def tokenizer(text):
+    words = nltk.word_tokenize(text)
+    return words
+
 def bag_of_words_model(x, y, mode, params):
     """A bag-of-words model. Note it disregards the word order in the text."""
     target = tf.one_hot(y, params.get("classes", 15), 1, 0)
@@ -54,9 +60,10 @@ def rnn_model(x, y, mode, params):
     # This creates embeddings matrix of [n_words, EMBEDDING_SIZE] and then
     # maps word indexes of the sequence into [batch_size, sequence_length,
     # EMBEDDING_SIZE].
-    word_vectors = learn.ops.categorical_variable(x, n_classes=n_words,
+    word_vectors = learn.ops.categorical_variable(x['x'], n_classes=n_words,
                                                   embedding_size=EMBEDDING_SIZE, name='words')
     
+
     # Split into list of embedding per word, while removing doc length dim.
     # word_list results to be a list of tensors [batch_size, EMBEDDING_SIZE].
     word_list = tf.unstack(word_vectors, axis=1)
@@ -66,8 +73,13 @@ def rnn_model(x, y, mode, params):
     target = tf.one_hot(y, params.get("classes", 15), 1, 0)
  #   yield(batch_size)
     # Create a Gated Recurrent Unit cell with hidden size of EMBEDDING_SIZE.
-    cell =tf.contrib.rnn.GRUCell(EMBEDDING_SIZE)
+    def make_cell():
+        cell =tf.contrib.rnn.GRUCell(EMBEDDING_SIZE)
+        cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=0.5)
+        return cell
 
+    cell = tf.contrib.rnn.MultiRNNCell(
+        [make_cell() for _ in range(10)], state_is_tuple=False)
     # Create an unrolled Recurrent Neural Networks to length of
     # MAX_DOCUMENT_LENGTH and passes word_list as inputs for each unit.
 
@@ -89,7 +101,7 @@ def rnn_model(x, y, mode, params):
     # Given encoding of RNN, take encoding of last step (e.g hidden size of the
     # neural network of last step) and pass it as features for logistic
     # regression over output classes.
-    prediction, loss = learn.models.logistic_regression(output, target)
+    prediction, loss = learn.models.logistic_regression(state, target)
     #output = tf.transpose(output)
     #weight = tf.Variable(tf.truncated_normal([EMBEDDING_SIZE, params['classes']], stddev=0.1))
     #bias = tf.Variable(tf.constant(0.1, shape=[params['classes']]))
@@ -107,11 +119,44 @@ def rnn_model(x, y, mode, params):
         optimizer='Adam', learning_rate=0.01)
     
     return {'class': tf.argmax(prediction,1 ), 'prob': prediction}, loss, train_op
+#x one record txt
+def tfidf_vsm(x, x_train,y_train,n_classes):
+    all_records = list(x_train)
+    all_records.append(x)
+    # Create TF-IDF of texts
+    # vsm model
+    tfidf = TfidfVectorizer(tokenizer=tokenizer,stop_words ='english',max_features=EMBEDDING_SIZE,smooth_idf=False)
+    sparse_all_texts = tfidf.fit_transform(all_records)
+    tfidf_texts = sparse_all_texts.toarray()
+    #x_tfidf = [tfidf_texts[-1] for i in range(len(x_train))]
+    train_tfidf = tfidf_texts[:-1]
+    sim = metrics.pairwise.cosine_similarity([tfidf_texts[-1]],train_tfidf)[0]
+    predict = np.ones(n_classes)
+    for i in range(len(sim)):
+        predict[y_train[i]] = min(predict[y_train[i]],sim[i])
+    return (predict)
+    
+
+
+def tfidf_online(x,y,x_train,y_train,n_classes):
+    predicts = []
+    for i in range(len(x)):
+        predicts.append(tfidf_vsm(x[i],x_train,y_train,n_classes))
+        for j in y[i]:
+            x_train.append(x[i])
+            y_train.append(j)
+    return predicts
+        
+def vote(x_tf,x_rnn,r):
+    re = x_tf*r+x_rnn*(1-r)
+    return re
 
 
 def main(unused_argv):
     global n_words
-    path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/EclipseBugRepository.xml"
+    #file: EclipseBugRepository.xml, ZXingBugRepository.xml,AspectJBugRepository.xml,SWTBugRepository.xml
+    file_name ='EclipseBugRepository.xml'
+    path = "/home/zhuyuecai/workspace/AITour/defectLocalization/data/"+file_name
     out_log = open(save_path, 'w')  
     """
     config_t = tf.ConfigProto(allow_soft_placement=True)
@@ -139,13 +184,17 @@ def main(unused_argv):
     #dataframe = dataframe.replace(np.nan, '', regex=True)
     #classes = len(dataframe.component_id.unique())
     
+    #=============================================
     out_log.write("=================\n")
     #print("Dataframe loaded %s" % str(dataframe.shape))
     out_log.write("total of classes: %s; "%(classes))
     out_log.write("total bugs: %s; "%(len(all_records)))
     out_log.write("=================\n")
     out_log.write("Test/Train split\n")
-    train, test = train_test_split(all_records, train_size=0.8)
+    #train, test = train_test_split(all_records, train_size=0.8)
+    sp = int(len(all_records)*0.8)
+    train = all_records[:sp]
+    test = all_records[sp:]
     out_log.write("train recodes: %s \n"%(len(train)))
     out_log.write("test recodes: %s \n"%(len(test)))
     train_records = [[d[0],d[1],d[2],f] for d in train for f in d[3]]
@@ -163,8 +212,6 @@ def main(unused_argv):
             t[i] += one_hot[dd[u]]
     y_train = t
     """
-  #  x_train = train.text
-   # y_train = train.component_id
     test_records = test
 
  #   [get_single_record(d,test_records) for d in test]
@@ -180,10 +227,11 @@ def main(unused_argv):
             #t[i] += one_hot[dd[u]]
        #     t[i]
    # y_test = t
-    
+    #VSM prediction
+    y_predicted_1= [p for p in  tfidf_online(x_test,y_test,x_train,y_train,classes)]
     #x_test = test.text
     #y_test = test.component_id
-    # Process vocabulary
+    # Process vocabulary   
     vocab_processor = learn.preprocessing.VocabularyProcessor(MAX_DOCUMENT_LENGTH)
     x_train = np.array(list(vocab_processor.fit_transform(x_train)))
     x_test = np.array(list(vocab_processor.transform(x_test)))
@@ -191,15 +239,42 @@ def main(unused_argv):
     out_log.write('Total words: %d ; ' % n_words)
     
     out_log.write("train data dimemsion:%s ;"%(str(x_train.shape)))
-    out_log.write("train target data dimemsion:%s; "%(len(y_train)))
+    
+    #out_log.write("train target data dimemsion:%s; "%(len(y_train)))
     # Build model
-    classifier = learn.Estimator(model_fn=bag_of_words_model, params={"classes": classes})
-    #classifier = learn.Estimator(model_fn=rnn_model, params={"classes": classes})
+    #classifier = learn.Estimator(model_fn=bag_of_words_model, params={"classes": classes})
+    classifier = learn.Estimator(model_fn=rnn_model, params={"classes": classes})
 
     # Train and predict
-    classifier.fit(x_train, y_train, steps=100)
-    y_predicted = [
-        np.argsort(p['prob']) for p in classifier.predict(x_test, as_iterable=True)]
+    input_fn = tf.contrib.learn.io.numpy_input_fn({"x":x_train}, np.array(y_train), batch_size=200, num_epochs=5)
+    classifier.fit(input_fn=input_fn)
+    #classifier2.fit(x_train, y_train, steps=100)
+    #y_predicted= [np.argsort(p) for p in  tfidf_online(x_test,y_test,x_train,y_train,classes)]
+
+
+
+    #y_predicted = [np.argsort(p['prob']) for p in classifier.predict({'x':x_test}, as_iterable=True)]
+    #y_predicted_1 = [
+    #    p['prob'] for p in classifier1.predict(x_test, as_iterable=True)]
+    #deep GRU prediction
+    y_predicted_2 = [p['prob'] for p in classifier.predict(x_test, as_iterable=True)]
+    #"""
+
+    #last DNN layer of the ensemble 
+    #------------------------------------------
+
+
+
+
+
+    #------------------------------------------
+    """
+    y_predicted = []
+    for i in range(len(y_predicted_1)):
+        s = [vote(y_predicted_1[i][j],y_predicted_2[i][j],0.1) for j in range(len(y_predicted_1[i]))]
+        y_predicted.append(np.argsort(s))
+
+    """
     n_test=len(y_test)
     ap_array = np.zeros(n_test)
     for n_return in range(1,classes+1):
