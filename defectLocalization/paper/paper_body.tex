@@ -32,6 +32,8 @@ The traditional way is to do the assigning based on the triager's experience and
 For experienced triager, they could spot light some potential defected location very fast and accurate.
 But for triager with less experience or even new to the project, the process could take longer time and the prediction would not be correct.
 Thus they may assign a wrong developer for the issue and reassigning would be required and a longer time to get the bug fixed. 
+Jeon \etal\\cite{jeong2009improving} reported that the Eclipse project takes on average 40 days for bug assignment and another 100 days for reassigning..
+The numbers for Mozilla are 180 days for the first assigning and another 250 days for reassigning.
 
 To help address this problem, recent research applies NLP techniques to learn from bug reports and suggest a ranked list of potential defect location\cite{gay2009use}\cite{lam2017bug}\cite{nguyen2011topic}\cite{zhou2012should}\cite{saha2013improving}\cite{shokripour2013so}, or to suggest the developer who could fix the bug\cite{anvik2011reducing}\cite{bhattacharya2010fine}\cite{xuan2012developer}\cite{jonsson2016automated}.
 All these approaches focus on combining source code and code change history from version controling tools(ex: Git)  with bug reports to make the prediction.
@@ -40,25 +42,172 @@ Bug report is the only source of information they can use to perform the triagin
 Therefore, in this work we focus on bug localization with only bug reports as the input source.
 
 
-\subsection{Information Retrieval From Bug Report}
+\subsection{Data Mining Bug Reports}
+The most popular technique used in information retrieval from bug reports is the VSM with TF-IDF as entry value\cite{gay2009use}\cite{zhou2012should}. 
+Another frequent used algorithm is the Latent Dirichlet Allocation(LDA)\cite{nguyen2011topic}.
+And resent works try to ensemble IR techniques with Machine Learning to achieve better performance\cite{jonsson2016automated}\cite{lam2017bug}.
+Jonsson \etal \cite{jonsson2016automated} ensemble TF-IDF with different ML algorithms with Stacked Generalization. 
+Lam \etal\ \cite{lam2017bug}combines rVSM with DNN.
 
-
-
+To the best of our knowledge, there is not past work to use DNN, more specifically deep Recurrent Neural Network independently to learn from bug reports and suggest potential defect location.
+In this work, we apply DNN with multiple layers of Gated Recurrent Unit to learning from bug reports, and compare its performance to VSM.
+Moreover, we ensemble the DNN with VSM to leverage the performance.
 
 \section{Methodology}
 
 \subsection{Vector Space Model}
+Vector Space Model was first proposed by Salton \etal\cite{salton1975vector} to quantify documents.
+With a pre-defined and indexed vocabulary of size $s$: $V = \{t_1, t_2,...,t_s\}$, 
+each term $t_i$ in a given document $d$ could be represented by a weight quantity $w_i$, where $i$ is its index in the vocabulary $V$.
+Thus the given document $d$ could be represented by a vector $d=[w_1,w_2,...,w_s]$.
+Obviously, the length of the vector $d$ is the same as the size of the vocabulary.
+If a term $t_j$ is not in document $d$, then $w_j = 0$.   
+With this vector representation, we can analyze the documents with quantitative methods.
 
 \subsection{TF-IDF}
+The selection of weighting method to use in VSM is important to the performance. 
+We choose TF-IDF\cite{salton1988term} because of its well reported performance in previous works.
+TF is short for term frequency. 
+There are different schemes to evaluate TF, in our implementation, we calcuate TF by fomular 1
+
+\begin{equation}
+	tf(t,d) = f_{t,d}
+\end{equation}
+
+where $t$ is the given term, $d$ is the document and $f_{t,d}$ is the count of term $t$ in document $d$.
+
+IDF is short for Inverse Document Frequency and is generated from equation 2in our implementation.
+
+\begin{equation}
+	idf(t) = log\frac{n_d}{df(d,t)} +1
+\end{equation}
+where $n_d$ is the total of documents and $df(d,t)$ is the number of documents containing term $t$.
+
+Then the weight $w_t$ is given by:
+\begin{equation}
+	w_t = tf(t)*idf(t)
+\end{equation}
+ 
+Then the resulting vector $w$ is normalized to get the vector $d$:
+\begin{equation}
+	d = \frac{w}{||w||_2} = \frac{w}{\sqrt{\sum_{i=1}^{s}w_i^2}}
+\end{equation} 
 
 
-\subsection{Gated Recurrent Unit}
-	
+\subsection{Our VSM Bug Localization Model}
+Similar as the how to rank risky files based on similar bugs in rVSM\cite{zhou2012should},
+after we obtain the vector representation of all bug reports, for a new comming report $d_n$ and an old bug report $d_i$ that has been fixed in the training set $D$ , we calculate their Cosine similarity:
+\begin{equation}
+	similarity(d_n,d_i) = \frac{d_n \cdot d_i}{||d_n||*||d_i||}
+\end{equation}
+
+For a given component $c$, define $D_c$ to be the set of bugs that are fixed by changing code in $c$,  then the risk of $c$ is given by:
+\begin{equation}
+	risk(c) = min(similarity(d_n,d_i)) \forall d_i \in D_c
+\end{equation}
+
+And the components are ranked by their risk score from maximum to minimum.
+\todo{report performance briefly}
+
+
+
+
+
+\subsection{Deep Gated Recurrent Unit Network}
+Recurrent Neural Network(RNN) is good at modeling sequential data. 
+As Mikolov introduced RNN to language modeling\cite{mikolov2010recurrent}, more and more applications of RNN in document analysis related task are proposed, for example, machine translation. 
+In recent years, people starts to apply RNN to model source code\cite{raychev2014code}. 
+It is believed that RNN can learn syntactic and semantic rules from text documents.
+Given that bug reports are also written by human natural language, we believe that we can use RNN to learn from bug reports and make precise predictions on risky components.
+We apply Gated Recurrent Unit in our RNN implementation.
+GRU is proposed to solve the gradient vanishing problem in training a (RNN)\cite{chung2014empirical}.
+It acheive the same performance as Long Short Term Memory but with less computations.
+Its stucture is show in figure \ref{gru}. $h$ is the current state and $\hat{h}$ is context state which could memorize the impact of the input history. 
+The reset gate $r$ controls whether the state from the current input should be memorized in $\hat{h}$.
+The update gate $z$ controls whether the memory from $\hat{h}$ should considered when updating $h$ to give out prediction.  
+\begin{figure}
+	\includegraphics[scale=0.5]{gru.png}
+	\caption{Gated Recurrent Unit\cite{chung2014empirical}}
+	\label{gru}
+\end{figure}
+
+Given the input vector $x_t$ at step t, each gates and states are calcuated recursively as:
+\begin{equation}
+	z_t = \sigma_g(W_zx_t+U_{z}h_{t-1}+b_z)
+\end{equation}	
+\begin{equation}
+	r_t =  \sigma_g(W_rx_t+U_{r}h_{t-1}+b_r)
+\end{equation}	
+\begin{equation}
+	h_t=(1-z_t) \circ h_{t-1} + z_t \circ \sigma_h(W_hx_t+U_{h}(r_t \circ h_{t-1})+b_h)
+\end{equation}
+Where $o$ is point-wise multiplication, $W$ and $U$ is the weight matrices for the corresponding component, $b$ is the bias vector.
+$\sigma_g$ is the sigmoid activation function which has the form:
+\begin{equation}
+	\sigma_g(x) = \frac{1}{1+e^{-1}}
+\end{equation}
+and $\sigma_h$ is the hyperbolic tangent activation function with the form:
+\begin{equation}
+\sigma_h(x)=\frac{e^x - e^{-x}}{e^x + e^{-x}}	
+\end{equation}
+
+In our DRNN implementation, the input layer pass the input vector to the embedding layer which generates the embedding of size $100$.
+The resulted embedding will then be passed to the stacked hidden GRU layers of size $10$.
+The encoding of the GRU hidden layers is pass to fit a logistic regression to predict the possibility of each components to be defected.
+\todo{draw the graph to show the deep structure}
+
+
+The number of layers and the embedding size is selected randomly. 
+Increasing the number of layers could improve performance a litter with longer training time as penalty.
+Small change to the embedding size does not change the result siginicantly
+Large change (ex: doubling the embedding size) would result in huge memory requirement and failed in runtime.
+\todo {report performance }
+
+
 \subsection{Ensemble of VSM and GRU}
-	
+Ensemble method \cite{dietterich2000ensemble} is used to combine predictions from multiple different model to give out better performance than a single model.	
+\cite{lam2017bug} ,\cite{wang2014version} and \cite{jonsson2016automated} apply ensemble method to perform bug triage and achieve good performance. 
+Different schemes can be used in ensembling. 
+Stacked Generalization\cite{wolpert1992stacked} is theorectally the most effective one which adds one more classifier to take predictions from ensembled models as input and is trained to reduce prediction error.  
+Jonsson \etal \cite{jonsson2016automated} ensembled TF-IDF with different ML algorithms with Stacked Generalization.
+However, as a preliminary research, we apply a simlper scheme 
+For a given component, we takes the minimum of the two risks given by the two aforemention models as the final risk.
+
+\begin{equation}
+risk(c) = min(risk_{VSM}(c) , risk_{DNN}(c) )
+\end{equation}
+
+\todo {report performace}
+
+
+ 
 \section{Experiment Design}
 
-\subsection{Data Set and Preprocessing}
+\subsection{Data Set }
+We perform our experiment on the exact same data set used in \cite{wang2014version} ,\cite{saha2013improving} and \cite{zhou2012should}.
+The detail of the data set is summarized in table 
+
+\todo {make the table}
+
+There are in total 3,379 bug reports from four popular open source projects in this data set, AspectJ, Eclipse, SWT, and ZXing. 
+For each bug report, we can obtain its title, description from the issue reporter, and the files being changed to fixed the reported bug. 
+ZXing, a barcode image processing library for Android platform, is the smallest data set.
+It contains 20 bugs fixed between March and September 2010 with 391 source files being changed.
+SWT is an open source widget tookit. 
+This data set has 98 bugs fixed from October 2004 to April 2010 with 484 source files being fixed. 
+Eclipse, the famous open source integrated development environment, contains 3075 bugs fixed in the period between October 2004 and March 2011 with 12863 files being changed.
+
+Differently from previous work, the granularity of our experiment is on component level instead of on file level. 
+Because we don't use the source code information to simulate a situation of strict source code security, new added files cannot be captured in the prediction with either VSM or DNN.
+Thus we first truncate the path of a given file by removing the file name to obtain the component containing the given file. 
+We assume that by knowing the potential defected component is enough for assigning the appropriate developer to solve the issue.
+Because if a developer knows a component very well, he should also has knowledge to the new added file to that component.
+After the truncation, there are\todo{add number} , , , , components in ZXing , SWT, Eclipse and AspectJ respectively. 
+We didn't perform our experiment on the project AspectJ, since there are only two components in this data set, the result was highly inflated . 
+The detail of the three data sets is summarized in table \todo{make the data set table}
+
+\subsection{Preprocessing}
+
 
 \subsection{Metrics}
 
@@ -66,9 +215,9 @@ Therefore, in this work we focus on bug localization with only bug reports as th
 
 \subsection{Evaluation Result}
 
-\subsection{Is RNN Better Than IR Methods in Mining Bug Report ?}
+%\subsection{Is RNN Better Than IR Methods in Mining Bug Report ?}
 
-\subsection{title}
+%\subsection{Is Ensembling Really Improve Performance}
 
 
 
