@@ -185,17 +185,24 @@ risk(c) = min(risk_{VSM}(c) , risk_{DNN}(c) )
 
 \subsection{Data Set }
 We perform our experiment on the exact same data set used in \cite{wang2014version} ,\cite{saha2013improving} and \cite{zhou2012should}.
-The detail of the data set is summarized in table 
+The detail of the data set is summarized in table \ref{data_table} 
 
-\todo {make the table}
 
 There are in total 3,379 bug reports from four popular open source projects in this data set, AspectJ, Eclipse, SWT, and ZXing. 
+\begin{itemize}
+	\item ZXing, a barcode image processing library for Android platform, is the smallest data set.
+	It contains 20 bugs fixed between March and September 2010 with 391 source files being changed.
+	\item SWT is an open source widget tookit. 
+	This data set has 98 bugs fixed from October 2004 to April 2010 with 484 source files being fixed. 
+	\item AspecJ, An aspect-oriented extension to the Java programming language 
+	\item Eclipse, the famous open source integrated development environment, contains 3075 bugs fixed in the period between October 2004 and March 2011 with 12863 files being changed.
+\end{itemize}
+
+
+
+
+
 For each bug report, we can obtain its title, description from the issue reporter, and the files being changed to fixed the reported bug. 
-ZXing, a barcode image processing library for Android platform, is the smallest data set.
-It contains 20 bugs fixed between March and September 2010 with 391 source files being changed.
-SWT is an open source widget tookit. 
-This data set has 98 bugs fixed from October 2004 to April 2010 with 484 source files being fixed. 
-Eclipse, the famous open source integrated development environment, contains 3075 bugs fixed in the period between October 2004 and March 2011 with 12863 files being changed.
 
 Differently from previous work, the granularity of our experiment is on component level instead of on file level. 
 Because we don't use the source code information to simulate a situation of strict source code security, new added files cannot be captured in the prediction with either VSM or DNN.
@@ -203,20 +210,117 @@ Thus we first truncate the path of a given file by removing the file name to obt
 We assume that by knowing the potential defected component is enough for assigning the appropriate developer to solve the issue.
 Because if a developer knows a component very well, he should also has knowledge to the new added file to that component.
 After the truncation, there are\todo{add number} , , , , components in ZXing , SWT, Eclipse and AspectJ respectively. 
-For the project AspectJ, since there are only two components in this data set, the result was highly inflated.
-Thus we perform the experiment on file level for the project AspecJ. 
-The detail of the three data sets is summarized in table \todo{make the data set table}
+We removed one bug from the SWT project since the defected file has no component level, it locates in the top most directory. 
+Removing one record does not impact on the performance evaluation given the relatively large number of bugs. 
+The detail of the three data sets is summarized in table \ref{data_table}
 
 \subsection{Preprocessing}
+Bug reports is different from normal text in that it could has code elements, source file names or error log in its content. 
+Here we list some examples to illustrate the situation. 
+This is some bug description from the Eclipse project:
 
+\textbf{Bug 77046:}If the Pattern Match job is already running when the console's partitioner reports that it is finished work, it is possible that the pattern matcher can think that it's finished before checking the entire document. This is the trace from the failed test: Incorrect number of messages logged for build. Should be 8. Was 2 junit.framework.AssertionFailedError: Incorrect number of messages logged for build. Should be 8. Was 2 at\\ org.eclipse.ant.tests.ui.BuildTests.testOutput(BuildTests.java:41) at\\ sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) at\\ sun.reflect.NativeMethodAccessorImpl.invoke\\(NativeMethodAccessorImpl.java:39) at\\ sun.reflect.DelegatingMethodAccessorImpl\\.invoke(DelegatingMethodAccessorImpl.java:25) at\\ org.eclipse.ant.tests.ui.AbstractAntUIBuildTest.access\$0\\(AbstractAntUIBuildTest.java:1) at\\ org.eclipse.ant.tests.ui.AbstractAntUIBuildTest\$1\\.run(AbstractAntUIBuildTest.java:44) at\\ java.lang.Thread.run(Thread.java:534)
+
+
+
+After the normal text describing the issue, the reporter also attached the error trace log as well.
+If we don't perform the preprocessing correctly, neither VSM or DRNN model could learn patterns from the error trace log, since the long component name would be seen as one term, but actually there are multiple important terms there. 
+For example, the path\\ "org.eclipse.ant.tests.ui.BuildTests.testOutput(BuildTests.java:41)"\\ contains important terms: ui,Build,Test. Here is another example:
+
+\textbf{Bug 76208}
+Boolean.getBoolean((String)newValue) queries if a system property exists with the argument name...not what we want in this context.
+
+
+The reporter is reporting an undesired functionality from a code segment. Again important terms would be missed if we don't separate the code segment correctly. 
+
+Thus we replace all non word character by white space to separate terms, and if a small case character followed by an upper case character, the separate them by a white space. 
+We also remove all numbers to reduce the size of the vocabulary and hence the requirement on computation resource. 
+After the preprocessing, we summarize the data set detail in table \ref{data_table}.We apply the 80-20\% split to generate the training and testing set for each project.
+
+\begin{table*}[!tbh]
+	\begin{center}
+		\caption{Data Set Summary}
+		\label{data_table}
+		
+		\begin{tabular}{c|l|l|l|l|l} %
+			\textbf{Project} & \textbf{Description} & \textbf{\#bugs} & \textbf{period} & \textbf{\#files} & \textbf{\#component}\\
+			\hline\hline
+			ZXing & barcode image processing  & 20 & 2010.3-& 391 &11\\
+                  &library  for Android platform & &  2010.10 & & \\			
+			SWT & open source widget & 98 & 2004.10-& 484 &15\\
+			v3.1 &  tookit & &2010.4 & &\\
+			AspecJ & An aspect-oriented  & 286 &2002.6 & 6485 & 534\\
+			       &   extension to the Java & & -2006.10 & &\\
+			       &    programming language & & & &\\
+			Eclipse & open source integrated& 3075&2004.10- & 12863& 555\\
+ 			 v3.1 &  development environment& &2011.3 &  &\\
+		\end{tabular}
+	\end{center}
+\end{table*}
 
 \subsection{Metrics}
+To evaluate the performance of different models, we apply the following common used metrics:
 
+\textbf{Top-k Bugs Hit}
+Top-k bugs hit is the number of bugs that are correctly localized from the top k components in the output ranked list. 
+At least one component has to been captured in the top k list for the given prediction be classified as a hit.
+
+\textbf{Mean Reciprocal Rank(MRR)} is a measure to evaluate the quality of the ranked list from a recommendation system. 
+If for all queries under test, the higer the the first hit relevant item is ranked, the higher value the MRR will be and vice versus. 
+It's calculated by the following formula:
+\begin{equation}
+MRR = \frac{1}{|Q|}\sum^{i \in Q}\frac{1}{rank_i}
+\end{equation} 
+Where $Q$ is the set of test queries, in our context would be the bugs in the testing data set. 
+$i$ is a particular bug in $Q$ and $rank_i$ is the ranking of the first collect prediction in the output list.
+
+MRR only cares about the ranking of the first correct prediction. 
+However, there could be multiple defected components for one reported bug. 
+We also need to check how well different models rank the other defected components.
+
+\textbf{Mean Average Precision(MAP)} To evaluate how well different models rank all defected components we first calculate the average precision for one bug report:
+ \begin{equation}
+ 	AP=\frac{1}{|C|} \sum_{i=1}^{N}prec(i)*relevance(i)
+ \end{equation}
+Where $C$ is the set of all defected components for the given bug. 
+$N$ is the total number of components in the system.  
+$prec(i)$ is the precision for the top-i list.
+$relevance(i)$ is 1 if the $i^{th}$ item is defected, otherwise $0$.
+
+Then MAP is calculated by the equation:
+\begin{equation}
+	MAP = \frac{1}{|Q|}\sum^{Q_i \in Q}AP(Q_i)
+\end{equation} 
+
+The model with higher MAP score is the better.
 \section{Evaluation and Discussion}
 
-\subsection{Evaluation Result}
+\subsection{Experiment Result}
 
-%\subsection{Is RNN Better Than IR Methods in Mining Bug Report ?}
+The performance of the VSM model is summarized in table \ref{performance_vsm}, we report the top k hit value with k equals 1,5 and 10.
+
+ \begin{table}[h]
+ 	\begin{center}
+ 		\caption{Performance Of VSM with TF-IDF}
+ 		\label{performance_vsm}
+ 		
+ 		\begin{tabular}{c|l|l|l|l|l} %
+ 			\textbf{Project} & \textbf{Top 1} & \textbf{Top 5} & \textbf{Top 10} & \textbf{MRR} & \textbf{MAP}\\
+ 			\hline\hline
+ 			ZXing & 1(25\%)& 2(50\%) &4(100\%)& 43.125\% &39.27\%\\
+ 					
+ 			SWT & 1(5\%) & 6(30\%) & 10(50\%)& 19.46\% & 10.73\%\\
+ 			
+ 			AspecJ & 3(5.17\%)  & 15(25.86\%) &24(41.38\%) & 14.40\% & 5.74\%\\
+ 			
+ 			Eclipse &7(1.15\%) & 17(2.78\%)& 22(3.6\%) & 2.37\%& 1.17\%\\
+ 			
+ 		\end{tabular}
+ 	\end{center}
+ \end{table}
+
+
+\subsection{Is RNN Better Than IR Methods in Mining Bug Report ?}
 
 %\subsection{Is Ensembling Really Improve Performance}
 

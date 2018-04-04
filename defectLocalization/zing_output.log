@@ -1,0 +1,212 @@
+=================
+total of classes: 11; total bugs: 20; =================
+Test/Train split
+train recodes: 16 
+test recodes: 4 
+result for the vsm
+============For top 1 
+Precision: 0.250000 
+Recall: 0.250000 
+fscore: 0.250000 
+Top 1 hit: 1
+=========================================
+For top 2 
+Precision: 0.250000 
+Recall: 0.500000 
+fscore: 0.333333 
+Top 2 hit: 2
+=========================================
+For top 3 
+Precision: 0.166667 
+Recall: 0.500000 
+fscore: 0.250000 
+Top 3 hit: 2
+=========================================
+For top 4 
+Precision: 0.125000 
+Recall: 0.500000 
+fscore: 0.200000 
+Top 4 hit: 2
+=========================================
+For top 5 
+Precision: 0.100000 
+Recall: 0.500000 
+fscore: 0.166667 
+Top 5 hit: 2
+=========================================
+For top 6 
+Precision: 0.083333 
+Recall: 0.500000 
+fscore: 0.142857 
+Top 6 hit: 2
+=========================================
+For top 7 
+Precision: 0.071429 
+Recall: 0.500000 
+fscore: 0.125000 
+Top 7 hit: 2
+=========================================
+For top 8 
+Precision: 0.093750 
+Recall: 0.541667 
+fscore: 0.146825 
+Top 8 hit: 3
+=========================================
+For top 9 
+Precision: 0.083333 
+Recall: 0.541667 
+fscore: 0.133333 
+Top 9 hit: 3
+=========================================
+For top 10 
+Precision: 0.100000 
+Recall: 0.666667 
+fscore: 0.163826 
+Top 10 hit: 4
+=========================================
+For top 11 
+Precision: 0.090909 
+Recall: 0.666667 
+fscore: 0.151207 
+Top 11 hit: 4
+=========================================
+MRR: 0.43125 
+MAP: 0.3927083333333333 
+Total words: 29 ; train data dimemsion:(43, 250) ;result for the deep_rnn
+============For top 1 
+Precision: 0.250000 
+Recall: 0.250000 
+fscore: 0.250000 
+Top 1 hit: 1
+=========================================
+For top 2 
+Precision: 0.125000 
+Recall: 0.250000 
+fscore: 0.166667 
+Top 2 hit: 1
+=========================================
+For top 3 
+Precision: 0.083333 
+Recall: 0.250000 
+fscore: 0.125000 
+Top 3 hit: 1
+=========================================
+For top 4 
+Precision: 0.062500 
+Recall: 0.250000 
+fscore: 0.100000 
+Top 4 hit: 1
+=========================================
+For top 5 
+Precision: 0.050000 
+Recall: 0.250000 
+fscore: 0.083333 
+Top 5 hit: 1
+=========================================
+For top 6 
+Precision: 0.083333 
+Recall: 0.500000 
+fscore: 0.142857 
+Top 6 hit: 2
+=========================================
+For top 7 
+Precision: 0.071429 
+Recall: 0.500000 
+fscore: 0.125000 
+Top 7 hit: 2
+=========================================
+For top 8 
+Precision: 0.062500 
+Recall: 0.500000 
+fscore: 0.111111 
+Top 8 hit: 2
+=========================================
+For top 9 
+Precision: 0.055556 
+Recall: 0.500000 
+fscore: 0.100000 
+Top 9 hit: 2
+=========================================
+For top 10 
+Precision: 0.100000 
+Recall: 0.666667 
+fscore: 0.163826 
+Top 10 hit: 4
+=========================================
+For top 11 
+Precision: 0.090909 
+Recall: 0.666667 
+fscore: 0.151207 
+Top 11 hit: 4
+=========================================
+MRR: 0.341666666667 
+MAP: 0.30833333333333335 
+result for the ensemble
+============For top 1 
+Precision: 0.500000 
+Recall: 0.500000 
+fscore: 0.500000 
+Top 1 hit: 2
+=========================================
+For top 2 
+Precision: 0.250000 
+Recall: 0.500000 
+fscore: 0.333333 
+Top 2 hit: 2
+=========================================
+For top 3 
+Precision: 0.166667 
+Recall: 0.500000 
+fscore: 0.250000 
+Top 3 hit: 2
+=========================================
+For top 4 
+Precision: 0.125000 
+Recall: 0.500000 
+fscore: 0.200000 
+Top 4 hit: 2
+=========================================
+For top 5 
+Precision: 0.100000 
+Recall: 0.500000 
+fscore: 0.166667 
+Top 5 hit: 2
+=========================================
+For top 6 
+Precision: 0.083333 
+Recall: 0.500000 
+fscore: 0.142857 
+Top 6 hit: 2
+=========================================
+For top 7 
+Precision: 0.071429 
+Recall: 0.500000 
+fscore: 0.125000 
+Top 7 hit: 2
+=========================================
+For top 8 
+Precision: 0.093750 
+Recall: 0.541667 
+fscore: 0.146825 
+Top 8 hit: 3
+=========================================
+For top 9 
+Precision: 0.083333 
+Recall: 0.541667 
+fscore: 0.133333 
+Top 9 hit: 3
+=========================================
+For top 10 
+Precision: 0.100000 
+Recall: 0.666667 
+fscore: 0.163826 
+Top 10 hit: 4
+=========================================
+For top 11 
+Precision: 0.090909 
+Recall: 0.666667 
+fscore: 0.151207 
+Top 11 hit: 4
+=========================================
+MRR: 0.55625 
+MAP: 0.5177083333333333 
