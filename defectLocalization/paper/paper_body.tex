@@ -297,23 +297,65 @@ The model with higher MAP score is the better.
 
 \subsection{Experiment Result}
 
-The performance of the VSM model is summarized in table \ref{performance_vsm}, we report the top k hit value with k equals 1,5 and 10.
+We report the performance of the three models in table \ref{performance_top_k} .
+For the project Zxing and SWT, because the their total of components is close to 10, we report the top-1 bug hit rate.
+For the project AspectJ and Eclipse, given the their large  number of components, we report the top-10 bug hit rate.
 
  \begin{table}[h]
  	\begin{center}
- 		\caption{Performance Of VSM with TF-IDF}
- 		\label{performance_vsm}
+ 		\caption{Top k bugs hit}
+ 		\label{performance_top_k}
  		
- 		\begin{tabular}{c|l|l|l|l|l} %
- 			\textbf{Project} & \textbf{Top 1} & \textbf{Top 5} & \textbf{Top 10} & \textbf{MRR} & \textbf{MAP}\\
+ 		\begin{tabular}{c|l|l|l} %
+ 			 \textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
  			\hline\hline
- 			ZXing & 1(25\%)& 2(50\%) &4(100\%)& 43.125\% &39.27\%\\
- 					
- 			SWT & 1(5\%) & 6(30\%) & 10(50\%)& 19.46\% & 10.73\%\\
+ 			ZXing(top-1)& 4(100\%)&4(100\%) &4(100\%) \\
  			
- 			AspecJ & 3(5.17\%)  & 15(25.86\%) &24(41.38\%) & 14.40\% & 5.74\%\\
+ 			SWT(top-1) & 10(50\%) & 20(100\%) &18(90\%)\\
  			
- 			Eclipse &7(1.15\%) & 17(2.78\%)& 22(3.6\%) & 2.37\%& 1.17\%\\
+ 			AspecJ(top-10) & 24(41.38\%)  & 46(79.31\%) & 28(48.28)\%\\
+ 			
+ 			Eclipse(top-10) &22(3.6\%) & 124(20.29\%)& 26(4.26\%)\\
+ 			
+ 		\end{tabular}
+ 	\end{center}
+ \end{table}
+
+ \begin{table}[h]
+ 	\begin{center}
+ 		\caption{Mean Reciprocal Rank(MRR)}
+ 		\label{performance_MRR}
+ 		
+ 		\begin{tabular}{c|l|l|l} %
+ 			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
+ 			\hline\hline
+ 			ZXing& 43.12\%&34.16\% &52.62\% \\
+ 			
+ 			SWT & 19.45\% & 67.92\% & 58.63\% \\
+ 			
+ 			AspecJ &14.40\%  & 44.10 \% & 46.22\%\\
+ 			
+ 			Eclipse &2.38\% & 11.81\%& 4.12\% \\
+ 			
+ 		\end{tabular}
+ 	\end{center}
+ \end{table}
+
+ \begin{table}[h]
+ 	\begin{center}
+ 		\caption{Mean Average Precision(MAP)}
+ 		\label{performance_map}
+ 		
+ 		\begin{tabular}{c|l|l|l} %
+ 			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
+ 			\hline\hline
+ 			ZXing& 39.27\%&30.83\% &51.77\%\\
+ 			
+ 			SWT & 10.73\%  & 51.13\%  & 39.71\% \\
+ 			
+ 			AspecJ &5.74\% & 21.39\% & 15.69\%\\
+ 			
+ 			Eclipse &1.18\% & 6.53\%& 1.97\% \\
  			
  		\end{tabular}
  	\end{center}
