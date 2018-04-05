@@ -297,9 +297,12 @@ The model with higher MAP score is the better.
 
 \subsection{Experiment Result}
 
-We report the performance of the three models in table \ref{performance_top_k} .
-For the project Zxing and SWT, because the their total of components is close to 10, we report the top-1 bug hit rate.
-For the project AspectJ and Eclipse, given the their large  number of components, we report the top-10 bug hit rate.
+We report the performance of the three models in table \ref{performance_top_k}, \ref{performance_MRR} and \ref{performance_map}.
+For the project Zxing and SWT, because the total of  their components is close to 10, we report the top-1 bug hit rate.
+For the project AspectJ and Eclipse, given the large  number of components, we report the top-10 bug hit rate.
+As shown in Table \ref{performance_top_k}, All models acheive 100\%  bug hit for the project ZXing, DRNN achieves the best result in all other three projects. It gets 100\%, 79.31\% and 20.29\% hit rate for the project SWT, AspectJ and Eclipse respectively. 
+VSM achieves the lowest bug hit rate which is 50\%, 41.38\% and 3.6\% for SWT, AspectJ and Eclipse respectively. 
+DRNN achieve 163.82\% more bugs hit on average than VSM.
 
  \begin{table}[h]
  	\begin{center}
@@ -311,15 +314,18 @@ For the project AspectJ and Eclipse, given the their large  number of components
  			\hline\hline
  			ZXing(top-1)& 4(100\%)&4(100\%) &4(100\%) \\
  			
- 			SWT(top-1) & 10(50\%) & 20(100\%) &18(90\%)\\
+ 			SWT(top-1) & 10(50\%) & \textbf{20(100\%)} &18(90\%)\\
  			
- 			AspecJ(top-10) & 24(41.38\%)  & 46(79.31\%) & 28(48.28)\%\\
+ 			AspecJ(top-10) & 24(41.38\%)  & \textbf{46(79.31\%)} & 28(48.28)\%\\
  			
- 			Eclipse(top-10) &22(3.6\%) & 124(20.29\%)& 26(4.26\%)\\
+ 			Eclipse(top-10) &22(3.6\%) & \textbf{124(20.29\%)} & 26(4.26\%)\\
  			
  		\end{tabular}
  	\end{center}
  \end{table}
+
+As shown in Table \ref{performance_MRR}, VSM achieves the best MRR of 43.12\% for ZXing, but DRNN achieves the best MRR in all other three projects which are 67.92\%, 44.10\% and 11.81\% for SWT, AspectJ and Eclipse respectively. 
+DRNN achieve 163.82\% more bugs hit on average than VSM.
 
  \begin{table}[h]
  	\begin{center}
@@ -340,6 +346,9 @@ For the project AspectJ and Eclipse, given the their large  number of components
  		\end{tabular}
  	\end{center}
  \end{table}
+
+
+
 
  \begin{table}[h]
  	\begin{center}
