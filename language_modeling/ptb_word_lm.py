@@ -52,7 +52,7 @@ $ tar xvf simple-examples.tgz
 
 To run:
 
-$ python ptb_word_lm.py --data_path=simple-examples/data/
+$ python ptb_word_lm.py --data_path=simple-examples/data/ --num_gpus=0 --save_path=/home/zhuyuecai/workspace/AITour/language_modeling/model_word_lstm/ --model=large
 
 """
 from __future__ import absolute_import
@@ -208,6 +208,11 @@ class PTBModel(object):
     if config.rnn_mode == BLOCK:
       return tf.contrib.rnn.LSTMBlockCell(
           config.hidden_size, forget_bias=0.0)
+    if config.rnn_mode== ELMAN:
+      return tf.contrib.rnn.BasicRNNCell(
+          config.hidden_size,  state_is_tuple=True,
+          reuse=not is_training)
+
     raise ValueError("rnn_mode %s not supported" % config.rnn_mode)
 
   def _build_rnn_graph_lstm(self, inputs, config, is_training):
@@ -445,6 +450,8 @@ def get_config():
 
 def main(_):
   per_list = []
+  val_list= []
+  test_list =[]
   if not FLAGS.data_path:
     raise ValueError("Must set --data_path to PTB data directory")
   gpus = [
@@ -518,15 +525,32 @@ def main(_):
         per_list.append(train_perplexity)
         print("Epoch: %d Train Perplexity: %.3f" % (i + 1, train_perplexity))
         valid_perplexity = run_epoch(session, mvalid)
+        val_list.append(valid_perplexity)
         print("Epoch: %d Valid Perplexity: %.3f" % (i + 1, valid_perplexity))
 
       test_perplexity = run_epoch(session, mtest)
       print("Test Perplexity: %.3f" % test_perplexity)
-
+      test_list.append(test_perplexity)
       if FLAGS.save_path:
         print("Saving model to %s." % FLAGS.save_path)
         sv.saver.save(session, FLAGS.save_path, global_step=sv.global_step)
   with open("./output.log",'w') as f:
+      f.write("train perplexity:\n")
       f.write(per_list)
+      for item in per_list:
+        f.write("%s," % item)
+      f.write("/n")
+      f.write("="*12)
+      f.write("validation perplexity:\n")
+      for item in val_list:
+        f.write("%s," % item)
+      f.write("/n")
+      f.write("="*12)
+      f.write("test perplexity:\n")
+      f.write(test_list)
+      for item in test_list:
+        f.write("%s," % item)
+
+
 if __name__ == "__main__":
   tf.app.run()

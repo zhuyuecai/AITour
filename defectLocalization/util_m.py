@@ -12,17 +12,25 @@ def get_single_record(record,in_list):
     clean_info = clean_info.replace("_"," ")
 
     clean_info = re.sub(r"\d+" ,"",clean_info)
-    clean_info = re.sub(r"[\[\]\{\}\#\$\^\%]" ," ",clean_info)
+    clean_info = re.sub(r"[^\W]" ," ",clean_info)
+    pattern = re.compile(r'[a-z][A-Z]')
+    cat = pattern.search(clean_info)
+    while(cat is not None):
+        i = cat.start()+1
+        clean_info = clean_info[:i]+ " " +clean_info[i:]
+        cat = pattern.search(clean_info)
     bug_id=record['@id']
     fixed_files = record['fixedFiles']['file']
     if isinstance(fixed_files, basestring):
-       splited_file = fixed_files.split('.')
+       splited_file = fixed_files.replace('/','.')
+       splited_file = splited_file.split('.')
        if len(splited_file)>2:
            in_list.append([bug_id,info['summary'],clean_info,[".".join(splited_file[:-2])]])
     else:
        splited_files = []
        for f in fixed_files:
-           splited_file = f.split('.')
+           splited_file = f.replace('/','.')
+           splited_file = splited_file.split('.')
            if len(splited_file)>2:
                splited_files.append(".".join(splited_file[:-2]))
           
