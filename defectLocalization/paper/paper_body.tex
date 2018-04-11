@@ -32,7 +32,7 @@ The traditional way is to do the assigning based on the triager's experience and
 For experienced triager, they could spot light some potential defected location very fast and accurate.
 But for triager with less experience or even new to the project, the process could take longer time and the prediction would not be correct.
 Thus they may assign a wrong developer for the issue and reassigning would be required and a longer time to get the bug fixed. 
-Jeon \etal\\cite{jeong2009improving} reported that the Eclipse project takes on average 40 days for bug assignment and another 100 days for reassigning..
+Jeon \etal \cite{jeong2009improving} reported that the Eclipse project takes on average 40 days for bug assignment and another 100 days for reassigning..
 The numbers for Mozilla are 180 days for the first assigning and another 250 days for reassigning.
 
 To help address this problem, recent research applies NLP techniques to learn from bug reports and suggest a ranked list of potential defect location\cite{gay2009use}\cite{lam2017bug}\cite{nguyen2011topic}\cite{zhou2012should}\cite{saha2013improving}\cite{shokripour2013so}, or to suggest the developer who could fix the bug\cite{anvik2011reducing}\cite{bhattacharya2010fine}\cite{xuan2012developer}\cite{jonsson2016automated}.
@@ -95,7 +95,7 @@ Then the resulting vector $w$ is normalized to get the vector $d$:
 
 
 \subsection{Our VSM Bug Localization Model}
-Similar as the how to rank risky files based on similar bugs in rVSM\cite{zhou2012should},
+Similar as how to rank risky files based on similar bugs in rVSM\cite{zhou2012should},
 after we obtain the vector representation of all bug reports, for a new comming report $d_n$ and an old bug report $d_i$ that has been fixed in the training set $D$ , we calculate their Cosine similarity:
 \begin{equation}
 	similarity(d_n,d_i) = \frac{d_n \cdot d_i}{||d_n||*||d_i||}
@@ -107,7 +107,7 @@ For a given component $c$, define $D_c$ to be the set of bugs that are fixed by 
 \end{equation}
 
 And the components are ranked by their risk score from maximum to minimum.
-\todo{report performance briefly}
+Our VSM model achieve a MRR of 43.12\%, 19.45\%, 14.40\% and 2.38\%, and a MAP of 39.27\%, 10.73\%, 5.74\% and 1.18\%  for projects ZXing, SWT,AspecJ and Eclipse respectively. 
 
 
 
@@ -154,14 +154,19 @@ and $\sigma_h$ is the hyperbolic tangent activation function with the form:
 In our DRNN implementation, the input layer pass the input vector to the embedding layer which generates the embedding of size $100$.
 The resulted embedding will then be passed to the stacked hidden GRU layers of size $10$.
 The encoding of the GRU hidden layers is pass to fit a logistic regression to predict the possibility of each components to be defected.
-\todo{draw the graph to show the deep structure}
+Figure \ref{dnn} illustrates the structure described above.
 
+\begin{figure}
+	\includegraphics[scale=0.35]{deep_structure.png}
+	\caption{Deep GRU network structure}
+	\label{dnn}
+\end{figure}
 
 The number of layers and the embedding size is selected randomly. 
 Increasing the number of layers could improve performance a litter with longer training time as penalty.
 Small change to the embedding size does not change the result siginicantly
 Large change (ex: doubling the embedding size) would result in huge memory requirement and failed in runtime.
-\todo {report performance }
+Our DRNN model achieve a MRR of 34.16\%, 67.92\%, 44.10\% and 11.81\%, and a MAP of 30.83\%, 51.13\%, 21.39\% and 6.53\%  for projects ZXing, SWT,AspecJ and Eclipse respectively. 
 
 
 \subsection{Ensemble of VSM and GRU}
@@ -209,7 +214,7 @@ Because we don't use the source code information to simulate a situation of stri
 Thus we first truncate the path of a given file by removing the file name to obtain the component containing the given file. 
 We assume that by knowing the potential defected component is enough for assigning the appropriate developer to solve the issue.
 Because if a developer knows a component very well, he should also has knowledge to the new added file to that component.
-After the truncation, there are\todo{add number} , , , , components in ZXing , SWT, Eclipse and AspectJ respectively. 
+After the truncation, there are 11, 15, 555 and 534 components in ZXing , SWT, Eclipse and AspectJ respectively. 
 We removed one bug from the SWT project since the defected file has no component level, it locates in the top most directory. 
 Removing one record does not impact on the performance evaluation given the relatively large number of bugs. 
 The detail of the three data sets is summarized in table \ref{data_table}
@@ -300,6 +305,7 @@ The model with higher MAP score is the better.
 We report the performance of the three models in table \ref{performance_top_k}, \ref{performance_MRR} and \ref{performance_map}.
 For the project Zxing and SWT, because the total of  their components is close to 10, we report the top-1 bug hit rate.
 For the project AspectJ and Eclipse, given the large  number of components, we report the top-10 bug hit rate.
+
 As shown in Table \ref{performance_top_k}, All models acheive 100\%  bug hit for the project ZXing, DRNN achieves the best result in all other three projects. It gets 100\%, 79.31\% and 20.29\% hit rate for the project SWT, AspectJ and Eclipse respectively. 
 VSM achieves the lowest bug hit rate which is 50\%, 41.38\% and 3.6\% for SWT, AspectJ and Eclipse respectively. 
 DRNN achieve 163.82\% more bugs hit on average than VSM.
@@ -325,7 +331,7 @@ DRNN achieve 163.82\% more bugs hit on average than VSM.
  \end{table}
 
 As shown in Table \ref{performance_MRR}, VSM achieves the best MRR of 43.12\% for ZXing, but DRNN achieves the best MRR in all other three projects which are 67.92\%, 44.10\% and 11.81\% for SWT, AspectJ and Eclipse respectively. 
-DRNN achieve 163.82\% more bugs hit on average than VSM.
+DRNN achieves 207.72\% higher MRR on average than VSM.
 
  \begin{table}[h]
  	\begin{center}
@@ -335,20 +341,22 @@ DRNN achieve 163.82\% more bugs hit on average than VSM.
  		\begin{tabular}{c|l|l|l} %
  			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
  			\hline\hline
- 			ZXing& 43.12\%&34.16\% &52.62\% \\
+ 			ZXing& 43.12\%&34.16\% &\textbf{52.62\%} \\
  			
- 			SWT & 19.45\% & 67.92\% & 58.63\% \\
+ 			SWT & 19.45\% & \textbf{67.92\%} & 58.63\% \\
  			
- 			AspecJ &14.40\%  & 44.10 \% & 46.22\%\\
+ 			AspecJ &14.40\%  & 44.10 \% & \textbf{46.22}\%\\
  			
- 			Eclipse &2.38\% & 11.81\%& 4.12\% \\
+ 			Eclipse &2.38\% & \textbf{11.81\%}& 4.12\% \\
  			
  		\end{tabular}
  	\end{center}
  \end{table}
 
 
-
+When comparing by MAP, same situation is observed. 
+VSM achieves better MAP in ZXing project which is 39.27\%, but DRNN achieves better result in all other three projects which are 51.13\%, 21.39\% and 6.53\% for SWT, AspecJ and Eclipse respectively. 
+DRNN achieves 320.27\% higher MAP than VSM on average. 
 
  \begin{table}[h]
  	\begin{center}
@@ -358,13 +366,13 @@ DRNN achieve 163.82\% more bugs hit on average than VSM.
  		\begin{tabular}{c|l|l|l} %
  			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
  			\hline\hline
- 			ZXing& 39.27\%&30.83\% &51.77\%\\
+ 			ZXing& 39.27\%&30.83\% &\textbf{51.77\%}\\
  			
- 			SWT & 10.73\%  & 51.13\%  & 39.71\% \\
+ 			SWT & 10.73\%  & \textbf{51.13\%}  & 39.71\% \\
  			
- 			AspecJ &5.74\% & 21.39\% & 15.69\%\\
+ 			AspecJ &5.74\% & \textbf{21.39\%} & 15.69\%\\
  			
- 			Eclipse &1.18\% & 6.53\%& 1.97\% \\
+ 			Eclipse &1.18\% & \textbf{6.53\%}& 1.97\% \\
  			
  		\end{tabular}
  	\end{center}
@@ -372,9 +380,26 @@ DRNN achieve 163.82\% more bugs hit on average than VSM.
 
 
 \subsection{Is RNN Better Than IR Methods in Mining Bug Report ?}
-
+Based on the fact that DRNN achieves better result in top-k bug hit, MRR and MAP in all three larger projects, it is reasonable to believe that DRNN is more suitable for learning from bug reports. Even for the smaller project ZXing, DRNN also achieves good result. 
+Considering that we did not perform hyper-parameters tuning, DRNN has the potential to achieve even better result if we did that. 
+However, since DNN is a black box method, we don't know why it can achieve such a good result and to theoretically validate our assumptions, we can only do the judgment based on their performance. 
+Future work can be done to understand how DRNN combines syntactic and semantic information from bug reports to give the predictions.
+ 
 %\subsection{Is Ensembling Really Improve Performance}
 
+\section{Threat To Validity}
+We have showed some bug reports to illustrate how it is different from natural text. Bug reports contains natural text, code segment, error trace log which make it more difficult to learn than natural text or pure source code files which has a unique grammar. Based on this we confirm by comparing their performance on predicting defected components that DRNN are more appropriate to used for data mining bug reports. 
+But bug reports in the industry could be very different from that in open source projects. 
+They can be more formalized and contains more important terms for IR methods to use. 
+We still need to perform similar experiment on bug reports from the industry to fully verify the conclusion. 
+However, we believe that natural text, code segments and error trace log are the three elements in bug reports even in the industry. 
+
+DRNN is a black box method. 
+We don't truly understand why it can achieve such a good performance, how it combines semantic and syntactic information from bug reports to give out the predictions.
+The conclusion is only based on empirical observation on their performance and has no theoretical prove.
+Understanding the symbolic representation of DNN's mechanism is still an open question not only in software engineering community but in all fields that DNN dominants.   
+
+\section{Conclusion}
 
 
 

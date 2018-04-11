@@ -52,7 +52,7 @@ $ tar xvf simple-examples.tgz
 
 To run:
 
-$ python ptb_word_lm.py --data_path=simple-examples/data/ --num_gpus=0 --save_path=/home/zhuyuecai/workspace/AITour/language_modeling/model_word_lstm/ --model=large
+$ python ptb_word_lm.py --data_path=simple-examples/data/ --num_gpus=0 --save_path=/home/zhuyuecai/workspace/AITour/language_modeling/model_char_elman/ --model=large --rnn_mode=ELMAN
 
 """
 from __future__ import absolute_import
@@ -93,7 +93,7 @@ FLAGS = flags.FLAGS
 BASIC = "basic"
 CUDNN = "cudnn"
 BLOCK = "block"
-
+ELMAN = "elman"
 
 def data_type():
   return tf.float16 if FLAGS.use_fp16 else tf.float32
@@ -372,7 +372,7 @@ class LargeConfig(object):
   lr_decay = 1 / 1.15
   batch_size = 80
   vocab_size = 10000
-  rnn_mode = BLOCK
+  rnn_mode = ELMAN
 
 
 class TestConfig(object):
@@ -389,7 +389,7 @@ class TestConfig(object):
   lr_decay = 0.5
   batch_size = 20
   vocab_size = 10000
-  rnn_mode = BASIC
+  rnn_mode = ELMAN
 
 
 def run_epoch(session, model, eval_op=None, verbose=False):
@@ -536,18 +536,16 @@ def main(_):
         sv.saver.save(session, FLAGS.save_path, global_step=sv.global_step)
   with open("./output.log",'w') as f:
       f.write("train perplexity:\n")
-      f.write(per_list)
       for item in per_list:
         f.write("%s," % item)
-      f.write("/n")
+      f.write("\n")
       f.write("="*12)
       f.write("validation perplexity:\n")
       for item in val_list:
         f.write("%s," % item)
-      f.write("/n")
+      f.write("\n")
       f.write("="*12)
       f.write("test perplexity:\n")
-      f.write(test_list)
       for item in test_list:
         f.write("%s," % item)
 
