@@ -320,69 +320,126 @@ DRNN achieve 163.82\% more bugs hit on average than VSM.
  		\caption{Top k bugs hit}
  		\label{performance_top_k}
  		
- 		\begin{tabular}{c|l|l|l} %
- 			 \textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
+ 		\begin{tabular}{c|l|l} %
+ 			 \textbf{Projects} & \textbf{VSM} & \textbf{DRNN}\\
  			\hline\hline
- 			ZXing(top-1)& 4(100\%)&4(100\%) &4(100\%) \\
+ 			ZXing(top-1)& 4(100\%)&4(100\%)  \\
  			
- 			SWT(top-1) & 10(50\%) & \textbf{20(100\%)} &18(90\%)\\
+ 			SWT(top-1) & 10(50\%) & \textbf{20(100\%)} \\
  			
- 			AspecJ(top-10) & 24(41.38\%)  & \textbf{46(79.31\%)} & 28(48.28)\%\\
+ 			AspecJ(top-10) & 24(41.38\%)  & \textbf{46(79.31\%)} \\
  			
- 			Eclipse(top-10) &22(3.6\%) & \textbf{124(20.29\%)} & 26(4.26\%)\\
+ 			Eclipse(top-10) &22(3.6\%) & \textbf{124(20.29\%)} \\
  			
  		\end{tabular}
  	\end{center}
  \end{table}
+ 
+%  \begin{table}[h]
+%  	\begin{center}
+%  		\caption{Top k bugs hit}
+%  		\label{performance_top_k}
+%  		
+%  		\begin{tabular}{c|l|l|l} %
+%  			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
+%  			\hline\hline
+%  			ZXing(top-1)& 4(100\%)&4(100\%) &4(100\%) \\
+%  			
+%  			SWT(top-1) & 10(50\%) & \textbf{20(100\%)} &18(90\%)\\
+%  			
+%  			AspecJ(top-10) & 24(41.38\%)  & \textbf{46(79.31\%)} & 28(48.28)\%\\
+%  			
+%  			Eclipse(top-10) &22(3.6\%) & \textbf{124(20.29\%)} & 26(4.26\%)\\
+%  			
+%  		\end{tabular}
+%  	\end{center}
+%  \end{table}
 
 As shown in Table \ref{performance_MRR}, VSM achieves the best MRR of 43.12\% for ZXing, but DRNN achieves the best MRR in all other three projects which are 67.92\%, 44.10\% and 11.81\% for SWT, AspectJ and Eclipse respectively. 
 DRNN achieves 207.72\% higher MRR on average than VSM.
+%
+% \begin{table}[h]
+% 	\begin{center}
+% 		\caption{Mean Reciprocal Rank(MRR)}
+% 		\label{performance_MRR}
+% 		
+% 		\begin{tabular}{c|l|l|l} %
+% 			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
+% 			\hline\hline
+% 			ZXing& 43.12\%&34.16\% &\textbf{52.62\%} \\
+% 			
+% 			SWT & 19.45\% & \textbf{67.92\%} & 58.63\% \\
+% 			
+% 			AspecJ &14.40\%  & 44.10 \% & \textbf{46.22}\%\\
+% 			
+% 			Eclipse &2.38\% & \textbf{11.81\%}& 4.12\% \\
+% 			
+% 		\end{tabular}
+% 	\end{center}
+% \end{table}
 
  \begin{table}[h]
  	\begin{center}
  		\caption{Mean Reciprocal Rank(MRR)}
  		\label{performance_MRR}
  		
- 		\begin{tabular}{c|l|l|l} %
- 			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
+ 		\begin{tabular}{c|l|l} %
+ 			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} \\
  			\hline\hline
- 			ZXing& 43.12\%&34.16\% &\textbf{52.62\%} \\
+ 			ZXing& 43.12\%&34.16\%  \\
  			
- 			SWT & 19.45\% & \textbf{67.92\%} & 58.63\% \\
+ 			SWT & 19.45\% & \textbf{67.92\%}  \\
  			
- 			AspecJ &14.40\%  & 44.10 \% & \textbf{46.22}\%\\
+ 			AspecJ &14.40\%  & 44.10 \% \\
  			
- 			Eclipse &2.38\% & \textbf{11.81\%}& 4.12\% \\
+ 			Eclipse &2.38\% & \textbf{11.81\%} \\
  			
  		\end{tabular}
  	\end{center}
  \end{table}
-
-
 When comparing by MAP, same situation is observed. 
 VSM achieves better MAP in ZXing project which is 39.27\%, but DRNN achieves better result in all other three projects which are 51.13\%, 21.39\% and 6.53\% for SWT, AspecJ and Eclipse respectively. 
 DRNN achieves 320.27\% higher MAP than VSM on average. 
 
- \begin{table}[h]
- 	\begin{center}
- 		\caption{Mean Average Precision(MAP)}
- 		\label{performance_map}
- 		
- 		\begin{tabular}{c|l|l|l} %
- 			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
- 			\hline\hline
- 			ZXing& 39.27\%&30.83\% &\textbf{51.77\%}\\
- 			
- 			SWT & 10.73\%  & \textbf{51.13\%}  & 39.71\% \\
- 			
- 			AspecJ &5.74\% & \textbf{21.39\%} & 15.69\%\\
- 			
- 			Eclipse &1.18\% & \textbf{6.53\%}& 1.97\% \\
- 			
- 		\end{tabular}
- 	\end{center}
- \end{table}
+% \begin{table}[h]
+% 	\begin{center}
+% 		\caption{Mean Average Precision(MAP)}
+% 		\label{performance_map}
+% 		
+% 		\begin{tabular}{c|l|l|l} %
+% 			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN} & \textbf{Ensemble} \\
+% 			\hline\hline
+% 			ZXing& 39.27\%&30.83\% &\textbf{51.77\%}\\
+% 			
+% 			SWT & 10.73\%  & \textbf{51.13\%}  & 39.71\% \\
+% 			
+% 			AspecJ &5.74\% & \textbf{21.39\%} & 15.69\%\\
+% 			
+% 			Eclipse &1.18\% & \textbf{6.53\%}& 1.97\% \\
+% 			
+% 		\end{tabular}
+% 	\end{center}
+% \end{table}
 
+\begin{table}[h]
+	\begin{center}
+		\caption{Mean Average Precision(MAP)}
+		\label{performance_map}
+		
+		\begin{tabular}{c|l|l} %
+			\textbf{Projects} & \textbf{VSM} & \textbf{DRNN}  \\
+			\hline\hline
+			ZXing& 39.27\%&30.83\% \\
+			
+			SWT & 10.73\%  & \textbf{51.13\%}   \\
+			
+			AspecJ &5.74\% & \textbf{21.39\%}\\
+			
+			Eclipse &1.18\% & \textbf{6.53\%} \\
+			
+		\end{tabular}
+	\end{center}
+\end{table}
 
 \subsection{Is RNN Better Than IR Methods in Mining Bug Report ?}
 Based on the fact that DRNN achieves better result in top-k bug hit, MRR and MAP in all three larger projects, it is reasonable to believe that DRNN is more suitable for learning from bug reports. Even for the smaller project ZXing, DRNN also achieves good result. 
@@ -412,7 +469,16 @@ Future work on an online training algorithm for deep neural network would be ver
 
 \section{Conclusion}
 
-
+Precise bug localization could help improve the correctness of developer assignment in issue triage.
+Previous work focus on combining source code information, versioning history and other complementary information with bug reports to improve the performance of risky file prediction.
+However, in companies with high code security policy, these information may not be available to bugs triage.
+In this work we perform bug localization by only learning from  bug reports and achieve acceptable performance. 
+Moreover, previous work applies IR based method to learn from bug reports. 
+Given the difference between bug reports and natrual text that bug report occationaly contains code segments, error trace log, 
+we believe deep recurrent neural network may be more capable in learning from bug reports.
+This is confirmed by the experiment comparing the performance of deep recurrent neural network and the TF-IDF with VSM on learning bug reports from four open source projects,
+ZXing, SWT, AspectJ and Eclipse. 
+Deep Recurrent Neural Network achieves on average 163\% more top-k bug hit, 207.72\% higher MRR and 320.27\% higer MAP than the VSM model. 
 
 
 
