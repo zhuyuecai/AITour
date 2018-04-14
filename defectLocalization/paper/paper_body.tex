@@ -5,20 +5,25 @@ Automating this step helps speed up bugs fixing and reduce costs in issue triagi
 Lam \etal\cite{lam2017bug} proposed the state of the art approach to automate bug localization by ensemble revised Vector Space Model(rVSM)\cite{zhou2012should} and Deep Neural Network(DNN).  
 Similar as most of the existed algorithms, this approach require source code information which is not always available to triagers or the QA team in large companies with code security requirement.
 Analyzing the code base dramatically increase the learning time of this kind of algorithm in large projects.
-Moreover, the fast evolution of source code further penalizes this approach that the predictive model has to be updated frequently.   
+%Moreover, the fast evolution of source code further penalizes this approach that the predictive model has to be updated frequently.   
 In this paper, we explore the possibility to predict defected components solely based on information learned from bug reports.
 
 Recurrent neural network(RNN) has been proved to be efficient in capturing semantic as well as syntactic information from text to build statistical language models.
 But for source code, Hellendoorn \etal show that the RNN is not better than traditional IR method in language model building\cite{hellendoorn2017deep}.
 Bug report is different from common text and source code in that it is generally composed by common text and source code segment or error trace message. 
-We believe that IR method and RNN can learn different information from bug reports and could complement each other.
+%We believe that IR method and RNN can learn different information from bug reports and could complement each other.
+In this work we want to find out whether deep Recurrent Neural Network can learn from bug report more efficiently than IR based method, namely the Vector Space Model. 
 Thus the ensemble of these two could offer better performance than using only one of them.
 
 The contribution of this paper is in two folds:  
 \begin{itemize}
-	\item an ensemble of naive tf-idf based VSM and Gated Recurrent Network to recommend high risk components solely based on bug reports.
-	\item By analyzing the performence of the naive tf-idf based VSM and Gated Recurrent Network on their own, and the ensemble of these two, we show that IR method and RNN can learn different information from bug reports and could complement each other to offer better performance in the ensemble method.
-\end{itemize}
+	%\item an ensemble of naive tf-idf based VSM and Gated Recurrent Network to recommend high risk components solely based on bug reports.
+	\item an naive tf-idf based VSM method and a deep Gated Recurrent Unit Network to recommend high risk components solely based on bug reports.
+	%\item By analyzing the performence of the naive tf-idf based VSM and Gated Recurrent Network,  we show that IR method and RNN can learn different information from bug reports and could complement each other to offer better performance in the ensemble method.
+	\item By analyzing the performence of the naive tf-idf based VSM and Gated Recurrent Network,  we show that deep Recurrent Neural network achieves 163\% more bug hit by top-k recommendation, 2 times higher Mean Reciprocal Rank(MRR) and 3 times higher Mean Average Precision(MAP) and hence confirm the hypethesis that DRNN can learn better from bug reports.
+	\end{itemize}
+
+The paper is organized as the following: 
 
 \section{Background}
 \subsection{Bug Localization In Post-release Software Quality Insurrance}
@@ -151,10 +156,10 @@ and $\sigma_h$ is the hyperbolic tangent activation function with the form:
 \sigma_h(x)=\frac{e^x - e^{-x}}{e^x + e^{-x}}	
 \end{equation}
 
-In our DRNN implementation, the input layer pass the input vector to the embedding layer which generates the embedding of size $100$.
-The resulted embedding will then be passed to the stacked hidden GRU layers of size $10$.
+In our DRNN implementation, the input layer pass the input vector to the embedding layer which generates the :word embedding of size $100$.
+The resulted embedding will then be passed to the stacked hidden GRU layers of size $10$ with each GRU cell of size $100$.
 The encoding of the GRU hidden layers is pass to fit a logistic regression to predict the possibility of each components to be defected.
-Figure \ref{dnn} illustrates the structure described above.
+Figure \ref{dnn} illustrates the structure described above. All settings are selected by random withno specific reason.
 
 \begin{figure}
 	\includegraphics[scale=0.35]{deep_structure.png}
@@ -168,21 +173,21 @@ Small change to the embedding size does not change the result siginicantly
 Large change (ex: doubling the embedding size) would result in huge memory requirement and failed in runtime.
 Our DRNN model achieve a MRR of 34.16\%, 67.92\%, 44.10\% and 11.81\%, and a MAP of 30.83\%, 51.13\%, 21.39\% and 6.53\%  for projects ZXing, SWT,AspecJ and Eclipse respectively. 
 
-
-\subsection{Ensemble of VSM and GRU}
-Ensemble method \cite{dietterich2000ensemble} is used to combine predictions from multiple different model to give out better performance than a single model.	
-\cite{lam2017bug} ,\cite{wang2014version} and \cite{jonsson2016automated} apply ensemble method to perform bug triage and achieve good performance. 
-Different schemes can be used in ensembling. 
-Stacked Generalization\cite{wolpert1992stacked} is theorectally the most effective one which adds one more classifier to take predictions from ensembled models as input and is trained to reduce prediction error.  
-Jonsson \etal \cite{jonsson2016automated} ensembled TF-IDF with different ML algorithms with Stacked Generalization.
-However, as a preliminary research, we apply a simlper scheme 
-For a given component, we takes the minimum of the two risks given by the two aforemention models as the final risk.
-
-\begin{equation}
-risk(c) = min(risk_{VSM}(c) , risk_{DNN}(c) )
-\end{equation}
-
-\todo {report performace}
+%
+%\subsection{Ensemble of VSM and GRU}
+%Ensemble method \cite{dietterich2000ensemble} is used to combine predictions from multiple different model to give out better performance than a single model.	
+%\cite{lam2017bug} ,\cite{wang2014version} and \cite{jonsson2016automated} apply ensemble method to perform bug triage and achieve good performance. 
+%Different schemes can be used in ensembling. 
+%Stacked Generalization\cite{wolpert1992stacked} is theorectally the most effective one which adds one more classifier to take predictions from ensembled models as input and is trained to reduce prediction error.  
+%Jonsson \etal \cite{jonsson2016automated} ensembled TF-IDF with different ML algorithms with Stacked Generalization.
+%However, as a preliminary research, we apply a simlper scheme 
+%For a given component, we takes the minimum of the two risks given by the two aforemention models as the final risk.
+%
+%\begin{equation}
+%risk(c) = min(risk_{VSM}(c) , risk_{DNN}(c) )
+%\end{equation}
+%
+%\todo {report performace}
 
 
  
@@ -381,13 +386,15 @@ DRNN achieves 320.27\% higher MAP than VSM on average.
 
 \subsection{Is RNN Better Than IR Methods in Mining Bug Report ?}
 Based on the fact that DRNN achieves better result in top-k bug hit, MRR and MAP in all three larger projects, it is reasonable to believe that DRNN is more suitable for learning from bug reports. Even for the smaller project ZXing, DRNN also achieves good result. 
+One potential reason to explain why DRNN is not better than ZXIng is that, ZXing is a small project with only 20 bugs in total, and 16 bugs in the training set. The size of the training set is not enough for DRNN to learn a good model. 
+Conversly, SWT, AspectJ and Eclipse has more bugs in the training data set which is sufficient for DRNN to learn a good model.
 Considering that we did not perform hyper-parameters tuning, DRNN has the potential to achieve even better result if we did that. 
 However, since DNN is a black box method, we don't know why it can achieve such a good result and to theoretically validate our assumptions, we can only do the judgment based on their performance. 
 Future work can be done to understand how DRNN combines syntactic and semantic information from bug reports to give the predictions.
  
 %\subsection{Is Ensembling Really Improve Performance}
 
-\section{Threat To Validity}
+\section{Threat and Future Work}
 We have showed some bug reports to illustrate how it is different from natural text. Bug reports contains natural text, code segment, error trace log which make it more difficult to learn than natural text or pure source code files which has a unique grammar. Based on this we confirm by comparing their performance on predicting defected components that DRNN are more appropriate to used for data mining bug reports. 
 But bug reports in the industry could be very different from that in open source projects. 
 They can be more formalized and contains more important terms for IR methods to use. 
@@ -396,8 +403,12 @@ However, we believe that natural text, code segments and error trace log are the
 
 DRNN is a black box method. 
 We don't truly understand why it can achieve such a good performance, how it combines semantic and syntactic information from bug reports to give out the predictions.
-The conclusion is only based on empirical observation on their performance and has no theoretical prove.
+The conclusion is only based on empirical observation on their performance and has no theoretical proof.
 Understanding the symbolic representation of DNN's mechanism is still an open question not only in software engineering community but in all fields that DNN dominants.   
+Moreover, since VSM performs better only for the project ZXing, finding the difference in bug reports between ZXing and the other three projects could help further understand how DRNN learns from bug reports. 
+
+Training a Deep Neural Network is very time consuming especially when the training data set is large. 
+Future work on an online training algorithm for deep neural network would be very beneficial.
 
 \section{Conclusion}
 
