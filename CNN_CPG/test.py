@@ -2,9 +2,14 @@ from __future__ import print_function, division
 from sklearn.model_selection import train_test_split
 import psycopg2
 import numpy as np
-from keras.layers import Convolution1D, Dense, MaxPooling1D, Flatten
+from keras.layers import Convolution1D, Dense, MaxPooling1D, Flatten, Activation
 from keras.models import Sequential 
 from imblearn.over_sampling import SMOTE 
+
+
+"""
+without bias, 0.667 accuracy
+"""
 
 
 def connect_to_db(dbname):
@@ -19,9 +24,8 @@ num_cpg = 1000
 num_kids=176
 nb_filter=50
 nb_class = 2
-filter_length = 10
-w0=2
-w1=1
+filter_length = 2
+with_bias=False
 save_path ="trained_model/my_model.h5"
 
 
@@ -44,6 +48,8 @@ for r in cpgs:
     cpg.append(r[0])
     kids.append(r[2])
 X=np.array(X)
+X=X.reshape(num_kids,num_cpg)
+
 
 kids=np.array(kids)
 kids=kids.reshape(num_kids,num_cpg)
@@ -53,9 +59,6 @@ kids = np.array(kids[0:num_kids])
 
 
 
-X=X.reshape(num_kids,num_cpg)
-#X=np.transpose(X)
-X = np.expand_dims(X, axis=2) 
 
 Y=[]
 
@@ -66,9 +69,9 @@ for r in phenos:
         print("kids don't match!")
         exit()
     counter+=1
-    Y.append([r[1],r[2]])
+    Y.append(r[1])
 
-Y=np.mat(Y)
+#Y=np.mat(Y)
 Y=np.asarray(Y)
 print(Y.shape)
 print(X.shape)
@@ -76,29 +79,45 @@ print(X.shape)
 sm = SMOTE(random_state=42)
 
 
-X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.1, random_state=42)
+#X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.1, random_state=42)
 
-X_res, Y_res = sm.fit_sample(X_train, Y_train)
+#X_res, Y_res = sm.fit_sample(X_train, Y_train)
 
+X_res, Y_res = sm.fit_sample(X, Y)
+
+#X=np.transpose(X)
+X_res = np.expand_dims(X_res, axis=2) 
+
+X = np.expand_dims(X, axis=2) 
+Y_res=np.column_stack((Y_res,1-Y_res))
+Y = np.column_stack((Y,1-Y))
+#Y_res = np.expand_dims(Y_res, axis=1)
+#np.column_stack((Y_res,1-Y_res))
+
+#Y_test = np.expand_dims(Y_test, axis=1)
+
+print(X_res.shape)
+print(Y_res.shape)
 
 model = Sequential((
     # The first conv layer learns `nb_filter` filters (aka kernels), each of size ``(filter_length, nb_input_series)``.
     # Its output will have shape (None, window_size - filter_length + 1, nb_filter), i.e., for each position in
     # the input timeseries, the activation of each filter at that position.
-    Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu', input_shape=(num_cpg,1),use_bias=False),
+    Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu', input_shape=(num_cpg,1),use_bias=with_bias),
     MaxPooling1D(),     # Downsample the output of convolution by 2X.
-    Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu',use_bias=False),
+    Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu',use_bias=with_bias),
     MaxPooling1D(),
     Flatten(),
     Dense(nb_class, activation='sigmoid'),     # For binary classification, change the activation to 'sigmoid'
-))
+    Activation('softmax')
+    ))
 #model.compile(loss='mse', optimizer='adam', metrics=['mae'])
 # To perform (binary) classification instead:
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['binary_accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['binary_accuracy'])
 print('\n\nModel with input size {}, output size {}, {} conv filters of length {}'.format(model.input_shape,
     model.output_shape, nb_filter, filter_length))
 model.summary()
-model.fit(X_res, Y_res, nb_epoch=25, batch_size=2, validation_data=(X_test, Y_test),class_weight={0:w0,1:w1})
+model.fit(X_res, Y_res, nb_epoch=25, batch_size=2, validation_data=(X, Y))
 pred = model.predict(X)
 
 print('\n\nactual', 'predicted', sep='\t')
