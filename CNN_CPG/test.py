@@ -4,6 +4,8 @@ import psycopg2
 import numpy as np
 from keras.layers import Convolution1D, Dense, MaxPooling1D, Flatten
 from keras.models import Sequential 
+from imblearn.over_sampling import SMOTE 
+
 
 def connect_to_db(dbname):
     db_basic = psycopg2.connect("dbname='%s' user='yzhu'  password='abcd1234' host = 'tarsus'"%(dbname))
@@ -71,8 +73,13 @@ Y=np.asarray(Y)
 print(Y.shape)
 print(X.shape)
 
+sm = SMOTE(random_state=42)
+
 
 X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.1, random_state=42)
+
+X_res, Y_res = sm.fit_sample(X_train, Y_train)
+
 
 model = Sequential((
     # The first conv layer learns `nb_filter` filters (aka kernels), each of size ``(filter_length, nb_input_series)``.
@@ -91,7 +98,7 @@ model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['binary_acc
 print('\n\nModel with input size {}, output size {}, {} conv filters of length {}'.format(model.input_shape,
     model.output_shape, nb_filter, filter_length))
 model.summary()
-model.fit(X_train, Y_train, nb_epoch=25, batch_size=2, validation_data=(X_test, Y_test),class_weight={0:w0,1:w1})
+model.fit(X_res, Y_res, nb_epoch=25, batch_size=2, validation_data=(X_test, Y_test),class_weight={0:w0,1:w1})
 pred = model.predict(X)
 
 print('\n\nactual', 'predicted', sep='\t')
