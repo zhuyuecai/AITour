@@ -201,11 +201,11 @@ if __name__=="__main__":
 
     conn.execute(query_get_pheno)
     phenos = conn.fetchall()
-    predictions = [leave_one_cnn(cpgs,phenos,i) for i in range(4)]
-    #predictions = [leave_one_cnn(cpgs,phenos,i) for i in range(num_kids)]
+    #predictions = [leave_one_cnn(cpgs,phenos,i) for i in range(4)]
+    predictions = [leave_one_cnn(cpgs,phenos,i) for i in range(num_kids)]
     n_correct = sum([p[2] for p in predictions])
-    #precision = float(n_correct)/num_kids
-    precision = float(n_correct)/4
+    precision = float(n_correct)/num_kids
+    #precision = float(n_correct)/4
     n_abuse_correct = sum([p[2] for p in predictions if p[1]==1])
     n_abuse = sum([p[1] for p in predictions])
     true_positive_rate= float(n_abuse_correct)/float(n_abuse)
